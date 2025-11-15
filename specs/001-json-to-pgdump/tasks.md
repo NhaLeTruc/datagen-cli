@@ -253,7 +253,7 @@ description: "Task list for JSON Schema to PostgreSQL Dump Generator"
 ### Tests for User Story 6 ⚠️
 
 - [x] T087 [P] [US6] Unit test for SQL format writer in tests/unit/pgdump/sql_writer_test.go (TDD: INSERT statements, batching)
-- [ ] T088 [P] [US6] Unit test for COPY format writer in tests/unit/pgdump/copy_writer_test.go (TDD: COPY commands, TSV data)
+- [x] T088 [P] [US6] Unit test for COPY format writer in tests/unit/pgdump/copy_writer_test.go (TDD: COPY commands, TSV data)
 - [ ] T089 [P] [US6] Integration test for SQL format in tests/integration/postgresql/sql_format_test.go (TDD: restore via psql)
 - [ ] T090 [P] [US6] Integration test for COPY format in tests/integration/postgresql/copy_format_test.go (TDD: restore via psql)
 
@@ -266,14 +266,14 @@ description: "Task list for JSON Schema to PostgreSQL Dump Generator"
 
 #### COPY Format Writer
 
-- [ ] T093 [P] [US6] Implement COPY format writer in internal/pgdump/copy_writer.go (CREATE TABLE, COPY FROM stdin, TSV data)
-- [ ] T094 [P] [US6] Implement COPY data escaping in internal/pgdump/copy_escape.go (tab, newline, backslash escaping)
+- [x] T093 [P] [US6] Implement COPY format writer in internal/pgdump/copy_writer.go (CREATE TABLE, COPY FROM stdin, TSV data)
+- [x] T094 [P] [US6] Implement COPY data escaping in internal/pgdump/copy_escape.go (tab, newline, backslash escaping)
 
 #### Format Selection
 
-- [ ] T095 [US6] Add format flag to generate command in internal/cli/generate.go (--format: custom|sql|copy)
-- [ ] T096 [US6] Update pipeline coordinator to select writer based on format in internal/pipeline/coordinator.go
-- [ ] T097 [US6] Update dump writer factory in internal/pgdump/writer.go (factory pattern for format selection)
+- [x] T095 [US6] Add format flag to generate command in internal/cli/generate.go (--format: custom|sql|copy)
+- [x] T096 [US6] Update pipeline coordinator to select writer based on format in internal/pipeline/coordinator.go
+- [x] T097 [US6] Update dump writer factory in internal/pgdump/writer.go (factory pattern for format selection)
 
 **Checkpoint**: All user stories complete and independently functional
 

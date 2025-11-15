@@ -25,7 +25,13 @@ func NewCoordinator() *Coordinator {
 }
 
 // Execute runs the complete pipeline: parse → validate → generate → write
+// Uses SQL format by default
 func (c *Coordinator) Execute(schemaJSON io.Reader, output io.Writer, seed int64) error {
+	return c.ExecuteWithFormat(schemaJSON, output, seed, "sql")
+}
+
+// ExecuteWithFormat runs the complete pipeline with specified output format
+func (c *Coordinator) ExecuteWithFormat(schemaJSON io.Reader, output io.Writer, seed int64, format string) error {
 	// Parse schema
 	s, err := schema.Parse(schemaJSON)
 	if err != nil {
@@ -38,8 +44,11 @@ func (c *Coordinator) Execute(schemaJSON io.Reader, output io.Writer, seed int64
 		return fmt.Errorf("schema validation failed: %v", errors[0])
 	}
 
-	// Create SQL writer
-	writer := pgdump.NewSQLWriter(output)
+	// Create writer based on format
+	writer, err := pgdump.NewWriter(output, format)
+	if err != nil {
+		return fmt.Errorf("failed to create writer: %w", err)
+	}
 
 	// Write schema structure
 	if err := writer.WriteSchema(s); err != nil {
@@ -48,7 +57,7 @@ func (c *Coordinator) Execute(schemaJSON io.Reader, output io.Writer, seed int64
 
 	// Generate and write data for each table
 	for tableName, table := range s.Tables {
-		if err := c.generateTableData(writer, tableName, table, seed); err != nil {
+		if err := c.generateTableDataWithWriter(writer, tableName, table, seed); err != nil {
 			return fmt.Errorf("failed to generate data for table %s: %w", tableName, err)
 		}
 	}
@@ -56,7 +65,78 @@ func (c *Coordinator) Execute(schemaJSON io.Reader, output io.Writer, seed int64
 	return nil
 }
 
-// generateTableData generates data for a single table
+// generateTableDataWithWriter generates data for a single table using any Writer
+func (c *Coordinator) generateTableDataWithWriter(writer pgdump.Writer, tableName string, table *schema.Table, seed int64) error {
+	ctx := generator.NewContextWithSeed(seed)
+	ctx.TableName = tableName
+
+	columnNames := make([]string, len(table.Columns))
+	for i, col := range table.Columns {
+		columnNames[i] = col.Name
+	}
+
+	// Check if writer supports row-by-row INSERTs (SQL format)
+	if rowWriter, ok := pgdump.IsRowWriter(writer); ok {
+		// Generate rows and write INSERT statements
+		for rowIdx := 0; rowIdx < table.RowCount; rowIdx++ {
+			ctx.RowIndex = rowIdx
+			row := make(map[string]interface{})
+
+			// Generate value for each column
+			for _, col := range table.Columns {
+				ctx.ColumnName = col.Name
+				val, err := c.generateColumnValue(ctx, col)
+				if err != nil {
+					return fmt.Errorf("failed to generate value for column %s: %w", col.Name, err)
+				}
+				row[col.Name] = val
+			}
+
+			if err := rowWriter.WriteInsert(tableName, columnNames, row); err != nil {
+				return fmt.Errorf("failed to write row: %w", err)
+			}
+		}
+		return nil
+	}
+
+	// Check if writer supports COPY format
+	if copyWriter, ok := pgdump.IsCOPYRowWriter(writer); ok {
+		// Write COPY header
+		if err := copyWriter.WriteCopyHeader(tableName, columnNames); err != nil {
+			return fmt.Errorf("failed to write COPY header: %w", err)
+		}
+
+		// Generate rows and write COPY data
+		for rowIdx := 0; rowIdx < table.RowCount; rowIdx++ {
+			ctx.RowIndex = rowIdx
+			row := make(map[string]interface{})
+
+			// Generate value for each column
+			for _, col := range table.Columns {
+				ctx.ColumnName = col.Name
+				val, err := c.generateColumnValue(ctx, col)
+				if err != nil {
+					return fmt.Errorf("failed to generate value for column %s: %w", col.Name, err)
+				}
+				row[col.Name] = val
+			}
+
+			if err := copyWriter.WriteCopyRow(columnNames, row); err != nil {
+				return fmt.Errorf("failed to write COPY row: %w", err)
+			}
+		}
+
+		// Write COPY footer
+		if err := copyWriter.WriteCopyFooter(); err != nil {
+			return fmt.Errorf("failed to write COPY footer: %w", err)
+		}
+		return nil
+	}
+
+	return fmt.Errorf("writer does not support row-by-row output")
+}
+
+// generateTableData generates data for a single table (deprecated - use generateTableDataWithWriter)
 func (c *Coordinator) generateTableData(writer *pgdump.SQLWriter, tableName string, table *schema.Table, seed int64) error {
 	ctx := generator.NewContextWithSeed(seed)
 	ctx.TableName = tableName

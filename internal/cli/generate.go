@@ -18,6 +18,7 @@ func NewGenerateCommand() *cobra.Command {
 		seed           int64
 		templateName   string
 		templateParams []string
+		format         string
 	)
 
 	cmd := &cobra.Command{
@@ -29,11 +30,14 @@ The schema defines tables, columns, and data generation rules.
 Output is a SQL file compatible with PostgreSQL.
 
 You can use a pre-built template with --template or provide a custom schema with --input.`,
-		Example: `  # Generate from custom schema
+		Example: `  # Generate from custom schema (SQL format by default)
   datagen generate -i schema.json -o dump.sql
 
   # Generate from template
   datagen generate --template ecommerce -o dump.sql
+
+  # Generate with COPY format
+  datagen generate -i schema.json -o dump.sql --format copy
 
   # Generate from template with custom parameters
   datagen generate --template saas --param tenants=500 -o dump.sql
@@ -47,6 +51,15 @@ You can use a pre-built template with --template or provide a custom schema with
 			}
 			if templateName == "" && inputFile == "" {
 				return fmt.Errorf("must specify either --input or --template")
+			}
+
+			// Validate format
+			if format == "" {
+				format = "sql" // Default format
+			}
+			validFormats := map[string]bool{"sql": true, "copy": true}
+			if !validFormats[format] {
+				return fmt.Errorf("invalid format %q, must be one of: sql, copy", format)
 			}
 
 			// Open input (stdin, file, or template)
@@ -126,8 +139,8 @@ You can use a pre-built template with --template or provide a custom schema with
 			coordinator.RegisterBasicGenerators()
 			coordinator.RegisterSemanticGenerators()
 
-			// Execute pipeline
-			if err := coordinator.Execute(input, output, seed); err != nil {
+			// Execute pipeline with format
+			if err := coordinator.ExecuteWithFormat(input, output, seed, format); err != nil {
 				return fmt.Errorf("generation failed: %w", err)
 			}
 
@@ -143,6 +156,7 @@ You can use a pre-built template with --template or provide a custom schema with
 	cmd.Flags().StringVarP(&inputFile, "input", "i", "", "input schema file (default: stdin)")
 	cmd.Flags().StringVarP(&outputFile, "output", "o", "", "output SQL file (default: stdout)")
 	cmd.Flags().Int64VarP(&seed, "seed", "s", 0, "random seed for deterministic generation")
+	cmd.Flags().StringVarP(&format, "format", "f", "sql", "output format: sql (INSERT statements), copy (COPY format)")
 	cmd.Flags().StringVar(&templateName, "template", "", "use pre-built template (ecommerce, saas, healthcare, finance)")
 	cmd.Flags().StringArrayVar(&templateParams, "param", []string{}, "override template parameters (format: key=value)")
 
