@@ -54,17 +54,17 @@ description: "Task list for JSON Schema to PostgreSQL Dump Generator"
 
 ### Foundational: CLI Framework
 
-- [ ] T014 [P] Write unit test for root command in tests/unit/cli/root_test.go (TDD: help text, flags parsing)
-- [ ] T015 [P] Implement root command in internal/cli/root.go with Cobra (--help, --version, --config)
-- [ ] T016 [P] Write unit test for version command in tests/unit/cli/version_test.go (TDD: version output formats)
-- [ ] T017 [P] Implement version command in internal/cli/version.go (show version, build info, Go version)
+- [x] T014 [P] Write unit test for root command in tests/unit/cli/root_test.go (TDD: help text, flags parsing)
+- [x] T015 [P] Implement root command in internal/cli/root.go with Cobra (--help, --version, --config)
+- [x] T016 [P] Write unit test for version command in tests/unit/cli/version_test.go (TDD: version output formats)
+- [x] T017 [P] Implement version command in internal/cli/version.go (show version, build info, Go version)
 
 ### Foundational: Generator Registry
 
-- [ ] T018 Write unit test for generator interface in tests/unit/generator/registry_test.go (TDD: register, get, not found cases)
-- [ ] T019 Implement generator registry in internal/generator/registry.go (registry pattern, thread-safe)
-- [ ] T020 Write unit test for generation context in tests/unit/generator/context_test.go (TDD: context creation, seeding)
-- [ ] T021 Implement generation context in internal/generator/context.go (GenerationContext with seeded rand)
+- [x] T018 Write unit test for generator interface in tests/unit/generator/registry_test.go (TDD: register, get, not found cases)
+- [x] T019 Implement generator registry in internal/generator/registry.go (registry pattern, thread-safe)
+- [x] T020 Write unit test for generation context in tests/unit/generator/context_test.go (TDD: context creation, seeding)
+- [x] T021 Implement generation context in internal/generator/context.go (GenerationContext with seeded rand)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
