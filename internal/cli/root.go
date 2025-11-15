@@ -32,6 +32,7 @@ and deterministic seeds for reproducible datasets.`,
 
 	// Add subcommands
 	cmd.AddCommand(NewVersionCommand())
+	cmd.AddCommand(NewGenerateCommand())
 
 	return cmd
 }

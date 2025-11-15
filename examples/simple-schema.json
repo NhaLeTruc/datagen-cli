@@ -1,0 +1,19 @@
+{
+  "version": "1.0",
+  "database": {
+    "name": "testdb",
+    "encoding": "UTF8",
+    "locale": "en_US.utf8"
+  },
+  "tables": {
+    "users": {
+      "columns": [
+        {"name": "id", "type": "serial"},
+        {"name": "email", "type": "varchar(255)"},
+        {"name": "created_at", "type": "timestamp"}
+      ],
+      "primary_key": ["id"],
+      "row_count": 5
+    }
+  }
+}

@@ -96,29 +96,29 @@ description: "Task list for JSON Schema to PostgreSQL Dump Generator"
 
 - [x] T028 [P] [US1] Write unit test for dump header in tests/unit/pgdump/header_test.go (TDD: magic bytes, version, metadata)
 - [x] T029 [P] [US1] Implement dump header writer in internal/pgdump/header.go (write PGDMP header, version, timestamp)
-- [ ] T030 [P] [US1] Write unit test for TOC entry in tests/unit/pgdump/toc_test.go (TDD: entry creation, dependencies, offsets)
-- [ ] T031 [P] [US1] Implement TOC structure in internal/pgdump/toc.go (TOCEntry, dependency tracking)
-- [ ] T032 [US1] Write unit test for dump writer in tests/unit/pgdump/writer_test.go (TDD: full dump flow, compression)
-- [ ] T033 [US1] Implement dump file writer in internal/pgdump/writer.go (streaming write, TOC, data sections)
-- [ ] T034 [P] [US1] Write unit test for compression in tests/unit/pgdump/compression_test.go (TDD: gzip compression, level 6)
-- [ ] T035 [P] [US1] Implement gzip compression in internal/pgdump/compression.go (compress data sections)
+- [x] T03- [x] T030 [P] [US1] Write unit test for TOC entry in tests/unit/pgdump/toc_test.go (TDD: entry creation, dependencies, offsets)
+- [x] T03- [x] T031 [P] [US1] Implement TOC structure in internal/pgdump/toc.go (TOCEntry, dependency tracking)
+- [x] T03- [x] T032 [US1] Write unit test for dump writer in tests/unit/pgdump/writer_test.go (TDD: full dump flow, compression)
+- [x] T03- [x] T033 [US1] Implement dump file writer in internal/pgdump/writer.go (streaming write, TOC, data sections)
+- [x] T03- [x] T034 [P] [US1] Write unit test for compression in tests/unit/pgdump/compression_test.go (TDD: gzip compression, level 6)
+- [x] T03- [x] T035 [P] [US1] Implement gzip compression in internal/pgdump/compression.go (compress data sections)
 
 #### Pipeline Orchestration
 
-- [ ] T036 [US1] Write unit test for dependency resolver in tests/unit/pipeline/dependency_test.go (TDD: topological sort, detect cycles)
-- [ ] T037 [US1] Implement dependency resolver in internal/pipeline/dependency.go (resolve FK dependencies, sort tables)
-- [ ] T038 [US1] Write unit test for pipeline coordinator in tests/unit/pipeline/coordinator_test.go (TDD: schema → dump flow)
-- [ ] T039 [US1] Implement pipeline coordinator in internal/pipeline/coordinator.go (orchestrate: parse → validate → generate → write)
+- [x] T03- [x] T036 [US1] Write unit test for dependency resolver in tests/unit/pipeline/dependency_test.go (TDD: topological sort, detect cycles)
+- [x] T03- [x] T037 [US1] Implement dependency resolver in internal/pipeline/dependency.go (resolve FK dependencies, sort tables)
+- [x] T03- [x] T038 [US1] Write unit test for pipeline coordinator in tests/unit/pipeline/coordinator_test.go (TDD: schema → dump flow)
+- [x] T03- [x] T039 [US1] Implement pipeline coordinator in internal/pipeline/coordinator.go (orchestrate: parse → validate → generate → write)
 
 #### Generate Command
 
-- [ ] T040 [US1] Write unit test for generate command in tests/unit/cli/generate_test.go (TDD: flags, stdin/stdout, file paths)
-- [ ] T041 [US1] Implement generate command in internal/cli/generate.go (parse args, call pipeline, handle errors)
-- [ ] T042 [US1] Wire generate command to root in internal/cli/root.go
+- [x] T04- [x] T040 [US1] Write unit test for generate command in tests/unit/cli/generate_test.go (TDD: flags, stdin/stdout, file paths)
+- [x] T04- [x] T041 [US1] Implement generate command in internal/cli/generate.go (parse args, call pipeline, handle errors)
+- [x] T04- [x] T042 [US1] Wire generate command to root in internal/cli/root.go
 
 #### CLI Entry Point
 
-- [ ] T043 [US1] Implement main.go in cmd/datagen/main.go (initialize CLI, execute root command)
+- [x] T04- [x] T043 [US1] Implement main.go in cmd/datagen/main.go (initialize CLI, execute root command)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional - can generate and restore basic dumps
 
