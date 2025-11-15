@@ -80,7 +80,7 @@ description: "Task list for JSON Schema to PostgreSQL Dump Generator"
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T022 [P] [US1] Contract test for basic type generators in tests/unit/generator/basic_test.go (TDD: integer, varchar, timestamp generators)
+- [x] T022 [P] [US1] Contract test for basic type generators in tests/unit/generator/basic_test.go (TDD: integer, varchar, timestamp generators)
 - [ ] T023 [P] [US1] Integration test for simple schema pipeline in tests/integration/pipeline/basic_pipeline_test.go (TDD: 2-table schema, verify row counts)
 - [ ] T024 [P] [US1] Integration test for PostgreSQL restore in tests/integration/postgresql/restore_test.go (TDD: generate dump, restore, query data)
 
@@ -88,7 +88,7 @@ description: "Task list for JSON Schema to PostgreSQL Dump Generator"
 
 #### Basic Generators
 
-- [ ] T025 [P] [US1] Implement basic type generators in internal/generator/basic.go (integer, varchar, text, timestamp, boolean)
+- [x] T025 [P] [US1] Implement basic type generators in internal/generator/basic.go (integer, varchar, text, timestamp, boolean)
 - [ ] T026 [P] [US1] Implement sequence generator in internal/generator/sequence.go (for serial/bigserial columns)
 - [ ] T027 [US1] Register basic generators in internal/generator/registry.go (register all basic types on init)
 
