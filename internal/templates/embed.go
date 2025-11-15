@@ -44,6 +44,12 @@ var templates = map[string]*Template{
 		Description: "E-commerce platform with products, customers, orders, and reviews",
 		Category:    "business",
 		Parameters: map[string]TemplateParameter{
+			"categories": {
+				Name:        "categories",
+				Type:        "int",
+				Default:     50,
+				Description: "Number of category records to generate",
+			},
 			"customers": {
 				Name:        "customers",
 				Type:        "int",
@@ -61,6 +67,18 @@ var templates = map[string]*Template{
 				Type:        "int",
 				Default:     2000,
 				Description: "Number of order records to generate",
+			},
+			"order_items": {
+				Name:        "order_items",
+				Type:        "int",
+				Default:     5000,
+				Description: "Number of order item records to generate",
+			},
+			"reviews": {
+				Name:        "reviews",
+				Type:        "int",
+				Default:     1500,
+				Description: "Number of review records to generate",
 			},
 		},
 	},

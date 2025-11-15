@@ -204,9 +204,14 @@ func (c *Coordinator) generateColumnValue(ctx *generator.Context, col *schema.Co
 
 // generateWithConfig creates a custom generator based on generator_config
 func (c *Coordinator) generateWithConfig(ctx *generator.Context, col *schema.Column) (interface{}, error) {
-	genType, ok := col.GeneratorConfig["type"].(string)
-	if !ok {
-		return nil, fmt.Errorf("generator_config missing 'type' field")
+	// Use GeneratorType field if set, otherwise look for "type" in config
+	genType := col.GeneratorType
+	if genType == "" {
+		var ok bool
+		genType, ok = col.GeneratorConfig["type"].(string)
+		if !ok {
+			return nil, fmt.Errorf("generator_config missing 'type' field")
+		}
 	}
 
 	var gen generator.Generator
@@ -214,11 +219,29 @@ func (c *Coordinator) generateWithConfig(ctx *generator.Context, col *schema.Col
 	switch genType {
 	case "weighted_enum":
 		weights := make(map[string]float64)
+
+		// Support two formats:
+		// 1. Map format: {"weights": {"completed": 0.70, "pending": 0.20}}
+		// 2. Array format: {"values": ["active", "inactive"], "weights": [80, 15]}
 		if weightsMap, ok := col.GeneratorConfig["weights"].(map[string]interface{}); ok {
+			// Format 1: Map format
 			for k, v := range weightsMap {
 				if f, ok := v.(float64); ok {
 					weights[k] = f
 				}
+			}
+		} else if values, ok := col.GeneratorConfig["values"].([]interface{}); ok {
+			// Format 2: Array format
+			weightsArray, _ := col.GeneratorConfig["weights"].([]interface{})
+			for i, val := range values {
+				key := fmt.Sprintf("%v", val)
+				weight := 1.0 // Default equal weight
+				if i < len(weightsArray) {
+					if f, ok := weightsArray[i].(float64); ok {
+						weight = f / 100.0 // Convert percentage to decimal
+					}
+				}
+				weights[key] = weight
 			}
 		}
 		gen = generator.NewWeightedEnumGenerator(weights)

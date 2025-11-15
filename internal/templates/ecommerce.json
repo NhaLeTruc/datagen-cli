@@ -222,7 +222,7 @@
           "nullable": false,
           "generator": "template",
           "generator_config": {
-            "template": "ORD-{year}-{seq:6}"
+            "template": "ORD-{{year}}-{{seq:6}}"
           }
         },
         {

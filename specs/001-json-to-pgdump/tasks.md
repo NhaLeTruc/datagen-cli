@@ -220,8 +220,8 @@ description: "Task list for JSON Schema to PostgreSQL Dump Generator"
 ### Tests for User Story 5 ⚠️
 
 - [x] T075 [P] [US5] Unit test for template loading in tests/unit/cli/template_test.go (TDD: list, show, export templates)
-- [ ] T076 [P] [US5] Integration test for ecommerce template in tests/integration/templates/ecommerce_test.go (TDD: verify tables, relationships, data)
-- [ ] T077 [P] [US5] Integration test for saas template in tests/integration/templates/saas_test.go (TDD: verify multi-tenant structure)
+- [x] T076 [P] [US5] Integration test for ecommerce template in tests/integration/templates/ecommerce_test.go (TDD: verify tables, relationships, data)
+- [x] T077 [P] [US5] Integration test for saas template in tests/integration/templates/saas_test.go (TDD: verify multi-tenant structure)
 
 ### Implementation for User Story 5
 

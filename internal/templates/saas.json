@@ -287,6 +287,8 @@
           "nullable": false,
           "generator": "timeseries",
           "generator_config": {
+            "start": "2024-01-01T00:00:00Z",
+            "end": "2024-12-31T23:59:59Z",
             "pattern": "uniform",
             "interval": "1h"
           }
@@ -331,7 +333,7 @@
           "nullable": false,
           "generator": "template",
           "generator_config": {
-            "template": "INV-{year}-{seq:6}"
+            "template": "INV-{{year}}-{{seq:6}}"
           }
         },
         {
