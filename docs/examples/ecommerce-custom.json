@@ -1,0 +1,636 @@
+{
+  "version": "1.0",
+  "database": {
+    "name": "ecommerce_custom_db",
+    "encoding": "UTF8",
+    "locale": "en_US.utf8"
+  },
+  "tables": {
+    "merchants": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "serial",
+          "nullable": false
+        },
+        {
+          "name": "merchant_id",
+          "type": "varchar(50)",
+          "nullable": false,
+          "generator": "pattern",
+          "generator_config": {
+            "pattern": "MCH-[A-Z0-9]{10}"
+          }
+        },
+        {
+          "name": "name",
+          "type": "varchar(200)",
+          "nullable": false
+        },
+        {
+          "name": "email",
+          "type": "varchar(255)",
+          "nullable": false
+        },
+        {
+          "name": "phone",
+          "type": "varchar(20)",
+          "nullable": true
+        },
+        {
+          "name": "status",
+          "type": "varchar(20)",
+          "nullable": false,
+          "generator": "weighted_enum",
+          "generator_config": {
+            "values": ["active", "suspended", "pending_review"],
+            "weights": [85, 10, 5]
+          }
+        },
+        {
+          "name": "commission_rate",
+          "type": "numeric(5,2)",
+          "nullable": false,
+          "generator": "integer_range",
+          "generator_config": {
+            "min": 5,
+            "max": 30
+          }
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": false
+        }
+      ],
+      "primary_key": ["id"],
+      "unique_constraints": [
+        {
+          "columns": ["merchant_id"]
+        },
+        {
+          "columns": ["email"]
+        }
+      ],
+      "row_count": 100
+    },
+    "products": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "serial",
+          "nullable": false
+        },
+        {
+          "name": "merchant_id",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "sku",
+          "type": "varchar(50)",
+          "nullable": false,
+          "generator": "pattern",
+          "generator_config": {
+            "pattern": "SKU-[A-Z]{3}-[0-9]{8}"
+          }
+        },
+        {
+          "name": "name",
+          "type": "varchar(255)",
+          "nullable": false
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "base_price",
+          "type": "numeric(10,2)",
+          "nullable": false,
+          "generator": "integer_range",
+          "generator_config": {
+            "min": 999,
+            "max": 999999
+          }
+        },
+        {
+          "name": "sale_price",
+          "type": "numeric(10,2)",
+          "nullable": true,
+          "generator": "integer_range",
+          "generator_config": {
+            "min": 499,
+            "max": 899999
+          }
+        },
+        {
+          "name": "cost",
+          "type": "numeric(10,2)",
+          "nullable": true,
+          "generator": "integer_range",
+          "generator_config": {
+            "min": 100,
+            "max": 500000
+          }
+        },
+        {
+          "name": "weight_kg",
+          "type": "numeric(8,2)",
+          "nullable": true,
+          "generator": "integer_range",
+          "generator_config": {
+            "min": 0,
+            "max": 10000
+          }
+        },
+        {
+          "name": "stock_quantity",
+          "type": "integer",
+          "nullable": false,
+          "generator": "integer_range",
+          "generator_config": {
+            "min": 0,
+            "max": 1000
+          }
+        },
+        {
+          "name": "status",
+          "type": "varchar(20)",
+          "nullable": false,
+          "generator": "weighted_enum",
+          "generator_config": {
+            "values": ["active", "inactive", "out_of_stock", "discontinued"],
+            "weights": [70, 10, 15, 5]
+          }
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp",
+          "nullable": false
+        }
+      ],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        {
+          "columns": ["merchant_id"],
+          "referenced_table": "merchants",
+          "referenced_columns": ["id"],
+          "on_delete": "RESTRICT"
+        }
+      ],
+      "unique_constraints": [
+        {
+          "columns": ["sku"]
+        }
+      ],
+      "indexes": [
+        {
+          "columns": ["merchant_id"]
+        },
+        {
+          "columns": ["status"]
+        }
+      ],
+      "row_count": 2000
+    },
+    "customers": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "serial",
+          "nullable": false
+        },
+        {
+          "name": "customer_id",
+          "type": "varchar(50)",
+          "nullable": false,
+          "generator": "pattern",
+          "generator_config": {
+            "pattern": "CST-[0-9]{12}"
+          }
+        },
+        {
+          "name": "email",
+          "type": "varchar(255)",
+          "nullable": false
+        },
+        {
+          "name": "first_name",
+          "type": "varchar(100)",
+          "nullable": false
+        },
+        {
+          "name": "last_name",
+          "type": "varchar(100)",
+          "nullable": false
+        },
+        {
+          "name": "phone",
+          "type": "varchar(20)",
+          "nullable": true
+        },
+        {
+          "name": "loyalty_points",
+          "type": "integer",
+          "nullable": false,
+          "generator": "integer_range",
+          "generator_config": {
+            "min": 0,
+            "max": 50000
+          }
+        },
+        {
+          "name": "lifetime_value",
+          "type": "numeric(12,2)",
+          "nullable": false,
+          "generator": "integer_range",
+          "generator_config": {
+            "min": 0,
+            "max": 10000000
+          }
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": false
+        },
+        {
+          "name": "last_order_at",
+          "type": "timestamp",
+          "nullable": true
+        }
+      ],
+      "primary_key": ["id"],
+      "unique_constraints": [
+        {
+          "columns": ["customer_id"]
+        },
+        {
+          "columns": ["email"]
+        }
+      ],
+      "indexes": [
+        {
+          "columns": ["email"]
+        },
+        {
+          "columns": ["last_order_at"]
+        }
+      ],
+      "row_count": 5000
+    },
+    "orders": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "serial",
+          "nullable": false
+        },
+        {
+          "name": "order_number",
+          "type": "varchar(50)",
+          "nullable": false,
+          "generator": "template",
+          "generator_config": {
+            "template": "ORD-{{year}}-{{seq:8}}"
+          }
+        },
+        {
+          "name": "customer_id",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "status",
+          "type": "varchar(20)",
+          "nullable": false,
+          "generator": "weighted_enum",
+          "generator_config": {
+            "values": ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled", "refunded"],
+            "weights": [5, 10, 15, 25, 35, 7, 3]
+          }
+        },
+        {
+          "name": "payment_status",
+          "type": "varchar(20)",
+          "nullable": false,
+          "generator": "weighted_enum",
+          "generator_config": {
+            "values": ["pending", "paid", "failed", "refunded"],
+            "weights": [5, 85, 5, 5]
+          }
+        },
+        {
+          "name": "payment_method",
+          "type": "varchar(50)",
+          "nullable": false,
+          "generator": "weighted_enum",
+          "generator_config": {
+            "values": ["credit_card", "debit_card", "paypal", "bank_transfer", "cash_on_delivery"],
+            "weights": [45, 25, 15, 10, 5]
+          }
+        },
+        {
+          "name": "subtotal",
+          "type": "numeric(12,2)",
+          "nullable": false,
+          "generator": "integer_range",
+          "generator_config": {
+            "min": 1000,
+            "max": 1000000
+          }
+        },
+        {
+          "name": "tax",
+          "type": "numeric(12,2)",
+          "nullable": false,
+          "generator": "integer_range",
+          "generator_config": {
+            "min": 0,
+            "max": 200000
+          }
+        },
+        {
+          "name": "shipping_cost",
+          "type": "numeric(10,2)",
+          "nullable": false,
+          "generator": "integer_range",
+          "generator_config": {
+            "min": 0,
+            "max": 10000
+          }
+        },
+        {
+          "name": "discount",
+          "type": "numeric(10,2)",
+          "nullable": true,
+          "generator": "integer_range",
+          "generator_config": {
+            "min": 0,
+            "max": 50000
+          }
+        },
+        {
+          "name": "total",
+          "type": "numeric(12,2)",
+          "nullable": false,
+          "generator": "integer_range",
+          "generator_config": {
+            "min": 1000,
+            "max": 1200000
+          }
+        },
+        {
+          "name": "currency",
+          "type": "varchar(3)",
+          "nullable": false,
+          "generator": "weighted_enum",
+          "generator_config": {
+            "values": ["USD", "EUR", "GBP", "JPY"],
+            "weights": [60, 20, 15, 5]
+          }
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": false,
+          "generator": "timeseries",
+          "generator_config": {
+            "start": "2024-01-01T00:00:00Z",
+            "end": "2024-12-31T23:59:59Z",
+            "pattern": "business_hours",
+            "interval": "15m"
+          }
+        },
+        {
+          "name": "confirmed_at",
+          "type": "timestamp",
+          "nullable": true
+        },
+        {
+          "name": "shipped_at",
+          "type": "timestamp",
+          "nullable": true
+        },
+        {
+          "name": "delivered_at",
+          "type": "timestamp",
+          "nullable": true
+        }
+      ],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        {
+          "columns": ["customer_id"],
+          "referenced_table": "customers",
+          "referenced_columns": ["id"],
+          "on_delete": "RESTRICT"
+        }
+      ],
+      "unique_constraints": [
+        {
+          "columns": ["order_number"]
+        }
+      ],
+      "indexes": [
+        {
+          "columns": ["customer_id"]
+        },
+        {
+          "columns": ["status"]
+        },
+        {
+          "columns": ["payment_status"]
+        },
+        {
+          "columns": ["created_at"]
+        }
+      ],
+      "row_count": 10000
+    },
+    "order_items": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "serial",
+          "nullable": false
+        },
+        {
+          "name": "order_id",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "product_id",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "quantity",
+          "type": "integer",
+          "nullable": false,
+          "generator": "integer_range",
+          "generator_config": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "unit_price",
+          "type": "numeric(10,2)",
+          "nullable": false,
+          "generator": "integer_range",
+          "generator_config": {
+            "min": 999,
+            "max": 999999
+          }
+        },
+        {
+          "name": "discount_percent",
+          "type": "numeric(5,2)",
+          "nullable": true,
+          "generator": "integer_range",
+          "generator_config": {
+            "min": 0,
+            "max": 50
+          }
+        },
+        {
+          "name": "tax_percent",
+          "type": "numeric(5,2)",
+          "nullable": false,
+          "generator": "integer_range",
+          "generator_config": {
+            "min": 0,
+            "max": 25
+          }
+        },
+        {
+          "name": "total",
+          "type": "numeric(12,2)",
+          "nullable": false,
+          "generator": "integer_range",
+          "generator_config": {
+            "min": 1000,
+            "max": 10000000
+          }
+        }
+      ],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        {
+          "columns": ["order_id"],
+          "referenced_table": "orders",
+          "referenced_columns": ["id"],
+          "on_delete": "CASCADE"
+        },
+        {
+          "columns": ["product_id"],
+          "referenced_table": "products",
+          "referenced_columns": ["id"],
+          "on_delete": "RESTRICT"
+        }
+      ],
+      "indexes": [
+        {
+          "columns": ["order_id"]
+        },
+        {
+          "columns": ["product_id"]
+        }
+      ],
+      "row_count": 25000
+    },
+    "shipments": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "serial",
+          "nullable": false
+        },
+        {
+          "name": "order_id",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "tracking_number",
+          "type": "varchar(100)",
+          "nullable": false,
+          "generator": "pattern",
+          "generator_config": {
+            "pattern": "TRK[0-9]{12}[A-Z]{2}"
+          }
+        },
+        {
+          "name": "carrier",
+          "type": "varchar(50)",
+          "nullable": false,
+          "generator": "weighted_enum",
+          "generator_config": {
+            "values": ["UPS", "FedEx", "DHL", "USPS", "Local"],
+            "weights": [30, 25, 20, 15, 10]
+          }
+        },
+        {
+          "name": "status",
+          "type": "varchar(20)",
+          "nullable": false,
+          "generator": "weighted_enum",
+          "generator_config": {
+            "values": ["pending", "in_transit", "delivered", "failed"],
+            "weights": [10, 40, 45, 5]
+          }
+        },
+        {
+          "name": "shipped_at",
+          "type": "timestamp",
+          "nullable": false
+        },
+        {
+          "name": "estimated_delivery",
+          "type": "timestamp",
+          "nullable": true
+        },
+        {
+          "name": "delivered_at",
+          "type": "timestamp",
+          "nullable": true
+        }
+      ],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        {
+          "columns": ["order_id"],
+          "referenced_table": "orders",
+          "referenced_columns": ["id"],
+          "on_delete": "RESTRICT"
+        }
+      ],
+      "unique_constraints": [
+        {
+          "columns": ["tracking_number"]
+        }
+      ],
+      "indexes": [
+        {
+          "columns": ["order_id"]
+        },
+        {
+          "columns": ["status"]
+        },
+        {
+          "columns": ["shipped_at"]
+        }
+      ],
+      "row_count": 8000
+    }
+  }
+}

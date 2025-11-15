@@ -1,0 +1,439 @@
+{
+  "version": "1.0",
+  "database": {
+    "name": "analytics_db",
+    "encoding": "UTF8",
+    "locale": "en_US.utf8"
+  },
+  "tables": {
+    "users": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "serial",
+          "nullable": false
+        },
+        {
+          "name": "user_id",
+          "type": "varchar(100)",
+          "nullable": false,
+          "generator": "pattern",
+          "generator_config": {
+            "pattern": "usr_[0-9a-f]{16}"
+          }
+        },
+        {
+          "name": "email",
+          "type": "varchar(255)",
+          "nullable": true
+        },
+        {
+          "name": "first_name",
+          "type": "varchar(100)",
+          "nullable": true
+        },
+        {
+          "name": "last_name",
+          "type": "varchar(100)",
+          "nullable": true
+        },
+        {
+          "name": "country",
+          "type": "varchar(100)",
+          "nullable": true
+        },
+        {
+          "name": "signup_date",
+          "type": "timestamp",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": false
+        }
+      ],
+      "primary_key": ["id"],
+      "unique_constraints": [
+        {
+          "columns": ["user_id"]
+        }
+      ],
+      "indexes": [
+        {
+          "columns": ["signup_date"]
+        },
+        {
+          "columns": ["country"]
+        }
+      ],
+      "row_count": 10000
+    },
+    "sessions": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "serial",
+          "nullable": false
+        },
+        {
+          "name": "session_id",
+          "type": "varchar(100)",
+          "nullable": false,
+          "generator": "pattern",
+          "generator_config": {
+            "pattern": "ses_[0-9a-f]{24}"
+          }
+        },
+        {
+          "name": "user_id",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "device_type",
+          "type": "varchar(20)",
+          "nullable": false,
+          "generator": "weighted_enum",
+          "generator_config": {
+            "values": ["desktop", "mobile", "tablet"],
+            "weights": [45, 45, 10]
+          }
+        },
+        {
+          "name": "browser",
+          "type": "varchar(50)",
+          "nullable": false,
+          "generator": "weighted_enum",
+          "generator_config": {
+            "values": ["Chrome", "Safari", "Firefox", "Edge", "Other"],
+            "weights": [60, 20, 10, 8, 2]
+          }
+        },
+        {
+          "name": "os",
+          "type": "varchar(50)",
+          "nullable": false,
+          "generator": "weighted_enum",
+          "generator_config": {
+            "values": ["Windows", "MacOS", "Linux", "iOS", "Android"],
+            "weights": [40, 25, 5, 15, 15]
+          }
+        },
+        {
+          "name": "referrer",
+          "type": "varchar(500)",
+          "nullable": true
+        },
+        {
+          "name": "landing_page",
+          "type": "varchar(500)",
+          "nullable": false
+        },
+        {
+          "name": "started_at",
+          "type": "timestamp",
+          "nullable": false,
+          "generator": "timeseries",
+          "generator_config": {
+            "start": "2024-01-01T00:00:00Z",
+            "end": "2024-12-31T23:59:59Z",
+            "pattern": "uniform",
+            "interval": "5m"
+          }
+        },
+        {
+          "name": "ended_at",
+          "type": "timestamp",
+          "nullable": true
+        },
+        {
+          "name": "duration_seconds",
+          "type": "integer",
+          "nullable": true,
+          "generator": "integer_range",
+          "generator_config": {
+            "min": 10,
+            "max": 3600
+          }
+        }
+      ],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        {
+          "columns": ["user_id"],
+          "referenced_table": "users",
+          "referenced_columns": ["id"],
+          "on_delete": "SET NULL"
+        }
+      ],
+      "unique_constraints": [
+        {
+          "columns": ["session_id"]
+        }
+      ],
+      "indexes": [
+        {
+          "columns": ["user_id"]
+        },
+        {
+          "columns": ["started_at"]
+        },
+        {
+          "columns": ["device_type"]
+        }
+      ],
+      "row_count": 50000
+    },
+    "events": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "serial",
+          "nullable": false
+        },
+        {
+          "name": "event_id",
+          "type": "varchar(100)",
+          "nullable": false,
+          "generator": "pattern",
+          "generator_config": {
+            "pattern": "evt_[0-9a-f]{20}"
+          }
+        },
+        {
+          "name": "session_id",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "event_type",
+          "type": "varchar(50)",
+          "nullable": false,
+          "generator": "weighted_enum",
+          "generator_config": {
+            "values": ["page_view", "click", "form_submit", "video_play", "download", "search", "add_to_cart", "purchase"],
+            "weights": [40, 25, 10, 8, 5, 7, 3, 2]
+          }
+        },
+        {
+          "name": "event_name",
+          "type": "varchar(100)",
+          "nullable": false
+        },
+        {
+          "name": "page_url",
+          "type": "varchar(500)",
+          "nullable": false
+        },
+        {
+          "name": "element_id",
+          "type": "varchar(100)",
+          "nullable": true
+        },
+        {
+          "name": "element_class",
+          "type": "varchar(100)",
+          "nullable": true
+        },
+        {
+          "name": "properties",
+          "type": "jsonb",
+          "nullable": true
+        },
+        {
+          "name": "timestamp",
+          "type": "timestamp",
+          "nullable": false,
+          "generator": "timeseries",
+          "generator_config": {
+            "start": "2024-01-01T00:00:00Z",
+            "end": "2024-12-31T23:59:59Z",
+            "pattern": "uniform",
+            "interval": "10s"
+          }
+        }
+      ],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        {
+          "columns": ["session_id"],
+          "referenced_table": "sessions",
+          "referenced_columns": ["id"],
+          "on_delete": "CASCADE"
+        }
+      ],
+      "unique_constraints": [
+        {
+          "columns": ["event_id"]
+        }
+      ],
+      "indexes": [
+        {
+          "columns": ["session_id"]
+        },
+        {
+          "columns": ["event_type"]
+        },
+        {
+          "columns": ["timestamp"]
+        }
+      ],
+      "row_count": 200000
+    },
+    "page_views": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "serial",
+          "nullable": false
+        },
+        {
+          "name": "session_id",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "url",
+          "type": "varchar(500)",
+          "nullable": false
+        },
+        {
+          "name": "title",
+          "type": "varchar(255)",
+          "nullable": false
+        },
+        {
+          "name": "duration_seconds",
+          "type": "integer",
+          "nullable": true,
+          "generator": "integer_range",
+          "generator_config": {
+            "min": 1,
+            "max": 600
+          }
+        },
+        {
+          "name": "scroll_depth_percent",
+          "type": "integer",
+          "nullable": true,
+          "generator": "integer_range",
+          "generator_config": {
+            "min": 0,
+            "max": 100
+          }
+        },
+        {
+          "name": "viewed_at",
+          "type": "timestamp",
+          "nullable": false,
+          "generator": "timeseries",
+          "generator_config": {
+            "start": "2024-01-01T00:00:00Z",
+            "end": "2024-12-31T23:59:59Z",
+            "pattern": "uniform",
+            "interval": "30s"
+          }
+        }
+      ],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        {
+          "columns": ["session_id"],
+          "referenced_table": "sessions",
+          "referenced_columns": ["id"],
+          "on_delete": "CASCADE"
+        }
+      ],
+      "indexes": [
+        {
+          "columns": ["session_id"]
+        },
+        {
+          "columns": ["viewed_at"]
+        },
+        {
+          "columns": ["url"]
+        }
+      ],
+      "row_count": 150000
+    },
+    "conversions": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "serial",
+          "nullable": false
+        },
+        {
+          "name": "session_id",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "conversion_type",
+          "type": "varchar(50)",
+          "nullable": false,
+          "generator": "weighted_enum",
+          "generator_config": {
+            "values": ["signup", "purchase", "subscription", "lead", "download"],
+            "weights": [30, 25, 20, 15, 10]
+          }
+        },
+        {
+          "name": "value",
+          "type": "numeric(10,2)",
+          "nullable": true,
+          "generator": "integer_range",
+          "generator_config": {
+            "min": 0,
+            "max": 100000
+          }
+        },
+        {
+          "name": "currency",
+          "type": "varchar(3)",
+          "nullable": true,
+          "generator": "weighted_enum",
+          "generator_config": {
+            "values": ["USD", "EUR", "GBP"],
+            "weights": [70, 20, 10]
+          }
+        },
+        {
+          "name": "converted_at",
+          "type": "timestamp",
+          "nullable": false,
+          "generator": "timeseries",
+          "generator_config": {
+            "start": "2024-01-01T00:00:00Z",
+            "end": "2024-12-31T23:59:59Z",
+            "pattern": "business_hours",
+            "interval": "15m"
+          }
+        }
+      ],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        {
+          "columns": ["session_id"],
+          "referenced_table": "sessions",
+          "referenced_columns": ["id"],
+          "on_delete": "RESTRICT"
+        }
+      ],
+      "indexes": [
+        {
+          "columns": ["session_id"]
+        },
+        {
+          "columns": ["conversion_type"]
+        },
+        {
+          "columns": ["converted_at"]
+        }
+      ],
+      "row_count": 5000
+    }
+  }
+}

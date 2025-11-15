@@ -307,7 +307,7 @@ description: "Task list for JSON Schema to PostgreSQL Dump Generator"
 
 ### Documentation & Examples
 
-- [ ] T111 [P] Create example schemas in docs/examples/ (blog, ecommerce-custom, analytics)
+- [x] T111 [P] Create example schemas in docs/examples/ (blog, ecommerce-custom, analytics)
 - [ ] T112 [P] Generate man pages in docs/man/ (using Cobra's GenManTree)
 - [ ] T113 [P] Create architecture documentation in docs/architecture.md
 - [ ] T114 [P] Create generator documentation in docs/generators.md (list all generators, examples)
