@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"strings"
-	"time"
 
 	"github.com/NhaLeTruc/datagen-cli/internal/schema"
 )
@@ -106,29 +105,52 @@ func (sw *SQLWriter) WriteInsert(tableName string, columns []string, row map[str
 	return nil
 }
 
-// formatValue formats a value for SQL
+// formatValue formats a value for SQL using the escape module
 func (sw *SQLWriter) formatValue(val interface{}) string {
-	if val == nil {
-		return "NULL"
+	return FormatValue(val)
+}
+
+// WriteBatchInsert writes batched INSERT statements for multiple rows
+func (sw *SQLWriter) WriteBatchInsert(tableName string, columns []string, rows []map[string]interface{}, batchSize int) error {
+	if len(rows) == 0 {
+		return nil
 	}
 
-	switch v := val.(type) {
-	case string:
-		// Escape single quotes
-		escaped := strings.ReplaceAll(v, "'", "''")
-		return fmt.Sprintf("'%s'", escaped)
-	case int, int32, int64:
-		return fmt.Sprintf("%d", v)
-	case float32, float64:
-		return fmt.Sprintf("%f", v)
-	case bool:
-		if v {
-			return "TRUE"
-		}
-		return "FALSE"
-	case time.Time:
-		return fmt.Sprintf("'%s'", v.Format("2006-01-02 15:04:05"))
-	default:
-		return fmt.Sprintf("'%v'", v)
+	if batchSize <= 0 {
+		batchSize = 100 // Default batch size
 	}
+
+	// Process rows in batches
+	for i := 0; i < len(rows); i += batchSize {
+		end := i + batchSize
+		if end > len(rows) {
+			end = len(rows)
+		}
+
+		batch := rows[i:end]
+
+		// Write INSERT statement header
+		fmt.Fprintf(sw.w, "INSERT INTO %s (%s) VALUES\n",
+			EscapeIdentifier(tableName), FormatIdentifierList(columns))
+
+		// Write value rows
+		for j, row := range batch {
+			fmt.Fprintf(sw.w, "    (")
+
+			values := make([]interface{}, len(columns))
+			for k, col := range columns {
+				values[k] = row[col]
+			}
+
+			fmt.Fprintf(sw.w, "%s)", FormatValueList(values))
+
+			if j < len(batch)-1 {
+				fmt.Fprintf(sw.w, ",\n")
+			} else {
+				fmt.Fprintf(sw.w, ";\n")
+			}
+		}
+	}
+
+	return nil
 }

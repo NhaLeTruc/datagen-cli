@@ -252,7 +252,7 @@ description: "Task list for JSON Schema to PostgreSQL Dump Generator"
 
 ### Tests for User Story 6 ⚠️
 
-- [ ] T087 [P] [US6] Unit test for SQL format writer in tests/unit/pgdump/sql_writer_test.go (TDD: INSERT statements, batching)
+- [x] T087 [P] [US6] Unit test for SQL format writer in tests/unit/pgdump/sql_writer_test.go (TDD: INSERT statements, batching)
 - [ ] T088 [P] [US6] Unit test for COPY format writer in tests/unit/pgdump/copy_writer_test.go (TDD: COPY commands, TSV data)
 - [ ] T089 [P] [US6] Integration test for SQL format in tests/integration/postgresql/sql_format_test.go (TDD: restore via psql)
 - [ ] T090 [P] [US6] Integration test for COPY format in tests/integration/postgresql/copy_format_test.go (TDD: restore via psql)
@@ -261,8 +261,8 @@ description: "Task list for JSON Schema to PostgreSQL Dump Generator"
 
 #### SQL Format Writer
 
-- [ ] T091 [P] [US6] Implement SQL format writer in internal/pgdump/sql_writer.go (CREATE TABLE, INSERT statements, batched inserts)
-- [ ] T092 [P] [US6] Implement SQL escaping and quoting in internal/pgdump/sql_escape.go (escape strings, identifiers, NULL values)
+- [x] T091 [P] [US6] Implement SQL format writer in internal/pgdump/sql_writer.go (CREATE TABLE, INSERT statements, batched inserts)
+- [x] T092 [P] [US6] Implement SQL escaping and quoting in internal/pgdump/sql_escape.go (escape strings, identifiers, NULL values)
 
 #### COPY Format Writer
 
