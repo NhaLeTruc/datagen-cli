@@ -3,6 +3,7 @@ package pipeline
 import (
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/NhaLeTruc/datagen-cli/internal/generator"
 	"github.com/NhaLeTruc/datagen-cli/internal/pgdump"
@@ -91,9 +92,14 @@ func (c *Coordinator) generateTableData(writer *pgdump.SQLWriter, tableName stri
 
 // generateColumnValue generates a value for a column
 func (c *Coordinator) generateColumnValue(ctx *generator.Context, col *schema.Column) (interface{}, error) {
+	// First, check if there's a custom generator_config
+	if col.GeneratorConfig != nil && len(col.GeneratorConfig) > 0 {
+		return c.generateWithConfig(ctx, col)
+	}
+
 	var genType string
 
-	// First, try semantic detection based on column name
+	// Try semantic detection based on column name
 	if c.detector != nil {
 		semanticType := c.detector.GetSemanticType(col.Name)
 		if semanticType != "" {
@@ -111,6 +117,74 @@ func (c *Coordinator) generateColumnValue(ctx *generator.Context, col *schema.Co
 	if err != nil {
 		// Fallback to varchar for unknown types
 		gen = generator.NewVarcharGenerator(255)
+	}
+
+	return gen.Generate(ctx)
+}
+
+// generateWithConfig creates a custom generator based on generator_config
+func (c *Coordinator) generateWithConfig(ctx *generator.Context, col *schema.Column) (interface{}, error) {
+	genType, ok := col.GeneratorConfig["type"].(string)
+	if !ok {
+		return nil, fmt.Errorf("generator_config missing 'type' field")
+	}
+
+	var gen generator.Generator
+
+	switch genType {
+	case "weighted_enum":
+		weights := make(map[string]float64)
+		if weightsMap, ok := col.GeneratorConfig["weights"].(map[string]interface{}); ok {
+			for k, v := range weightsMap {
+				if f, ok := v.(float64); ok {
+					weights[k] = f
+				}
+			}
+		}
+		gen = generator.NewWeightedEnumGenerator(weights)
+
+	case "pattern":
+		pattern, _ := col.GeneratorConfig["pattern"].(string)
+		gen = generator.NewPatternGenerator(pattern)
+
+	case "template":
+		template, _ := col.GeneratorConfig["template"].(string)
+		gen = generator.NewTemplateGenerator(template)
+
+	case "integer_range":
+		min := int64(0)
+		max := int64(100)
+		if minVal, ok := col.GeneratorConfig["min"].(float64); ok {
+			min = int64(minVal)
+		}
+		if maxVal, ok := col.GeneratorConfig["max"].(float64); ok {
+			max = int64(maxVal)
+		}
+		gen = generator.NewIntegerRangeGenerator(min, max)
+
+	case "timeseries":
+		// Parse timeseries config
+		startStr, _ := col.GeneratorConfig["start"].(string)
+		endStr, _ := col.GeneratorConfig["end"].(string)
+		intervalStr, _ := col.GeneratorConfig["interval"].(string)
+		pattern, _ := col.GeneratorConfig["pattern"].(string)
+
+		// Parse times (simplified - assumes RFC3339 format)
+		startTime, _ := time.Parse(time.RFC3339, startStr)
+		endTime, _ := time.Parse(time.RFC3339, endStr)
+
+		// Parse interval (simplified - assumes format like "1h")
+		interval := time.Hour
+		if len(intervalStr) > 0 {
+			if parsed, err := time.ParseDuration(intervalStr); err == nil {
+				interval = parsed
+			}
+		}
+
+		gen = generator.NewTimeSeriesGenerator(startTime, endTime, interval, pattern)
+
+	default:
+		return nil, fmt.Errorf("unknown generator type: %s", genType)
 	}
 
 	return gen.Generate(ctx)
@@ -159,6 +233,13 @@ func (c *Coordinator) RegisterSemanticGenerators() {
 	c.registry.Register("postal_code", generator.NewPostalCodeGenerator())
 	c.registry.Register("created_at", generator.NewCreatedAtGenerator())
 	c.registry.Register("updated_at", generator.NewUpdatedAtGenerator())
+}
+
+// RegisterCustomGenerators registers all custom generators
+// Note: These are registered as templates, actual instances created based on config
+func (c *Coordinator) RegisterCustomGenerators() {
+	// Custom generators are instantiated dynamically based on generator_config
+	// We don't pre-register them since they require parameters
 }
 
 // GetRegistry returns the generator registry
