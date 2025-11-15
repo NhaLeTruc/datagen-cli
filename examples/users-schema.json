@@ -1,0 +1,41 @@
+{
+  "version": "1.0",
+  "database": {
+    "name": "userdb",
+    "encoding": "UTF8"
+  },
+  "tables": {
+    "users": {
+      "columns": [
+        {"name": "id", "type": "serial"},
+        {"name": "email", "type": "varchar(255)"},
+        {"name": "first_name", "type": "varchar(50)"},
+        {"name": "last_name", "type": "varchar(50)"},
+        {"name": "phone", "type": "varchar(20)"},
+        {"name": "created_at", "type": "timestamp"},
+        {"name": "updated_at", "type": "timestamp"}
+      ],
+      "primary_key": ["id"],
+      "row_count": 5
+    },
+    "addresses": {
+      "columns": [
+        {"name": "id", "type": "serial"},
+        {"name": "user_id", "type": "integer"},
+        {"name": "street_address", "type": "text"},
+        {"name": "city", "type": "varchar(100)"},
+        {"name": "country", "type": "varchar(100)"},
+        {"name": "postal_code", "type": "varchar(20)"}
+      ],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        {
+          "columns": ["user_id"],
+          "referenced_table": "users",
+          "referenced_columns": ["id"]
+        }
+      ],
+      "row_count": 5
+    }
+  }
+}

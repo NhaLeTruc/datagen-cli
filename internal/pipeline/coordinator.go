@@ -12,12 +12,14 @@ import (
 // Coordinator orchestrates the data generation pipeline
 type Coordinator struct {
 	registry *generator.Registry
+	detector *generator.SemanticDetector
 }
 
 // NewCoordinator creates a new pipeline coordinator
 func NewCoordinator() *Coordinator {
 	return &Coordinator{
 		registry: generator.DefaultRegistry(),
+		detector: generator.NewSemanticDetector(),
 	}
 }
 
@@ -89,8 +91,20 @@ func (c *Coordinator) generateTableData(writer *pgdump.SQLWriter, tableName stri
 
 // generateColumnValue generates a value for a column
 func (c *Coordinator) generateColumnValue(ctx *generator.Context, col *schema.Column) (interface{}, error) {
-	// Determine generator type from column type
-	genType := c.mapTypeToGenerator(col.Type)
+	var genType string
+
+	// First, try semantic detection based on column name
+	if c.detector != nil {
+		semanticType := c.detector.GetSemanticType(col.Name)
+		if semanticType != "" {
+			genType = semanticType
+		}
+	}
+
+	// If no semantic match, use PostgreSQL type
+	if genType == "" {
+		genType = c.mapTypeToGenerator(col.Type)
+	}
 
 	// Try to get generator from registry
 	gen, err := c.registry.Get(genType)
@@ -130,4 +144,24 @@ func (c *Coordinator) RegisterBasicGenerators() {
 	c.registry.Register("timestamp", generator.NewTimestampGenerator())
 	c.registry.Register("boolean", generator.NewBooleanGenerator())
 	c.registry.Register("serial", generator.NewSerialGenerator())
+}
+
+// RegisterSemanticGenerators registers all semantic generators
+func (c *Coordinator) RegisterSemanticGenerators() {
+	c.registry.Register("email", generator.NewEmailGenerator())
+	c.registry.Register("phone", generator.NewPhoneGenerator())
+	c.registry.Register("first_name", generator.NewFirstNameGenerator())
+	c.registry.Register("last_name", generator.NewLastNameGenerator())
+	c.registry.Register("full_name", generator.NewFullNameGenerator())
+	c.registry.Register("address", generator.NewAddressGenerator())
+	c.registry.Register("city", generator.NewCityGenerator())
+	c.registry.Register("country", generator.NewCountryGenerator())
+	c.registry.Register("postal_code", generator.NewPostalCodeGenerator())
+	c.registry.Register("created_at", generator.NewCreatedAtGenerator())
+	c.registry.Register("updated_at", generator.NewUpdatedAtGenerator())
+}
+
+// GetRegistry returns the generator registry
+func (c *Coordinator) GetRegistry() *generator.Registry {
+	return c.registry
 }

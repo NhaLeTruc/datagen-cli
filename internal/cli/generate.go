@@ -52,6 +52,7 @@ Output is a SQL file compatible with PostgreSQL.`,
 			// Create coordinator and register generators
 			coordinator := pipeline.NewCoordinator()
 			coordinator.RegisterBasicGenerators()
+			coordinator.RegisterSemanticGenerators()
 
 			// Execute pipeline
 			if err := coordinator.Execute(input, output, seed); err != nil {
