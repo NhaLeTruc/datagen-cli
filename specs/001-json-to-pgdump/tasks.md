@@ -159,31 +159,31 @@ description: "Task list for JSON Schema to PostgreSQL Dump Generator"
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T055 [P] [US3] Unit test for weighted enum generator in tests/unit/generator/custom_test.go (TDD: distribution accuracy ±3%)
-- [ ] T056 [P] [US3] Unit test for pattern generator in tests/unit/generator/custom_test.go (TDD: regex pattern compliance)
-- [ ] T057 [P] [US3] Unit test for template generator in tests/unit/generator/custom_test.go (TDD: template placeholder replacement)
-- [ ] T058 [P] [US3] Unit test for timeseries generator in tests/unit/generator/timeseries_test.go (TDD: patterns, intervals, business hours)
-- [ ] T059 [P] [US3] Integration test for custom patterns in tests/integration/pipeline/custom_patterns_test.go (TDD: verify distributions, patterns, timeseries)
+- [x] T055 [P] [US3] Unit test for weighted enum generator in tests/unit/generator/custom_test.go (TDD: distribution accuracy ±3%)
+- [x] T056 [P] [US3] Unit test for pattern generator in tests/unit/generator/custom_test.go (TDD: regex pattern compliance)
+- [x] T057 [P] [US3] Unit test for template generator in tests/unit/generator/custom_test.go (TDD: template placeholder replacement)
+- [x] T058 [P] [US3] Unit test for timeseries generator in tests/unit/generator/timeseries_test.go (TDD: patterns, intervals, business hours)
+- [x] T059 [P] [US3] Integration test for custom patterns in tests/integration/pipeline/custom_patterns_test.go (TDD: verify distributions, patterns, timeseries)
 
 ### Implementation for User Story 3
 
 #### Custom Pattern Generators
 
-- [ ] T060 [P] [US3] Implement weighted enum generator in internal/generator/custom.go (WeightedEnumGenerator with distribution validation)
-- [ ] T061 [P] [US3] Implement pattern generator in internal/generator/custom.go (PatternGenerator using regex)
-- [ ] T062 [P] [US3] Implement template generator in internal/generator/custom.go (TemplateGenerator with year, seq, rand placeholders)
-- [ ] T063 [P] [US3] Implement integer range generator in internal/generator/custom.go (IntegerRangeGenerator with min/max)
+- [x] T060 [P] [US3] Implement weighted enum generator in internal/generator/custom.go (WeightedEnumGenerator with distribution validation)
+- [x] T061 [P] [US3] Implement pattern generator in internal/generator/custom.go (PatternGenerator using regex)
+- [x] T062 [P] [US3] Implement template generator in internal/generator/custom.go (TemplateGenerator with year, seq, rand placeholders)
+- [x] T063 [P] [US3] Implement integer range generator in internal/generator/custom.go (IntegerRangeGenerator with min/max)
 
 #### Time-Series Generator
 
-- [ ] T064 [P] [US3] Implement time-series generator in internal/generator/timeseries.go (uniform, business_hours, daily_peak patterns)
-- [ ] T065 [US3] Register custom generators in internal/generator/registry.go (register weighted_enum, pattern, template, timeseries, integer_range)
+- [x] T064 [P] [US3] Implement time-series generator in internal/generator/timeseries.go (uniform, business_hours, daily_peak patterns)
+- [x] T065 [US3] Register custom generators in internal/generator/registry.go (register weighted_enum, pattern, template, timeseries, integer_range)
 
 #### Schema Extensions
 
-- [ ] T066 [US3] Extend schema types to support generator_config in internal/schema/types.go (add GeneratorConfig map to Column)
-- [ ] T067 [US3] Update schema parser to parse generator_config in internal/schema/parser.go
-- [ ] T068 [US3] Update pipeline to pass generator_config to generators in internal/pipeline/coordinator.go
+- [x] T066 [US3] Extend schema types to support generator_config in internal/schema/types.go (add GeneratorConfig map to Column)
+- [x] T067 [US3] Update schema parser to parse generator_config in internal/schema/parser.go
+- [x] T068 [US3] Update pipeline to pass generator_config to generators in internal/pipeline/coordinator.go
 
 **Checkpoint**: All user stories 1-3 should now work independently - basic, semantic, and custom data generation
 
@@ -197,15 +197,15 @@ description: "Task list for JSON Schema to PostgreSQL Dump Generator"
 
 ### Tests for User Story 4 ⚠️
 
-- [ ] T069 [P] [US4] Integration test for deterministic generation in tests/integration/pipeline/deterministic_test.go (TDD: same seed → identical output)
-- [ ] T070 [P] [US4] Integration test for different seeds in tests/integration/pipeline/seed_variation_test.go (TDD: different seeds → different data, same distribution)
+- [x] T069 [P] [US4] Integration test for deterministic generation in tests/integration/pipeline/deterministic_test.go (TDD: same seed → identical output)
+- [x] T070 [P] [US4] Integration test for different seeds in tests/integration/pipeline/seed_variation_test.go (TDD: different seeds → different data, same distribution)
 
 ### Implementation for User Story 4
 
-- [ ] T071 [US4] Add seed flag to generate command in internal/cli/generate.go (--seed flag, parse int64)
-- [ ] T072 [US4] Update generation context to use seed in internal/generator/context.go (initialize rand.New(rand.NewSource(seed)))
-- [ ] T073 [US4] Ensure all generators use context.Rand in internal/generator/*.go (never use global rand)
-- [ ] T074 [US4] Update pipeline to propagate seed to all workers in internal/pipeline/coordinator.go
+- [x] T071 [US4] Add seed flag to generate command in internal/cli/generate.go (--seed flag, parse int64) [NOTE: Already implemented in Phase 2]
+- [x] T072 [US4] Update generation context to use seed in internal/generator/context.go (initialize rand.New(rand.NewSource(seed))) [NOTE: Already implemented in Phase 2]
+- [x] T073 [US4] Ensure all generators use context.Rand in internal/generator/*.go (never use global rand) [NOTE: Already implemented in US1-US3]
+- [x] T074 [US4] Update pipeline to propagate seed to all workers in internal/pipeline/coordinator.go [NOTE: Already implemented in US1]
 
 **Checkpoint**: User Stories 1-4 complete - core functionality with deterministic generation
 
