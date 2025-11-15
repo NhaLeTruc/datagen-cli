@@ -33,6 +33,12 @@ and deterministic seeds for reproducible datasets.`,
 	// Add subcommands
 	cmd.AddCommand(NewVersionCommand())
 	cmd.AddCommand(NewGenerateCommand())
+	cmd.AddCommand(newTemplateCmd())
 
 	return cmd
+}
+
+// NewRootCmd is an alias for NewRootCommand for backward compatibility
+func NewRootCmd() *cobra.Command {
+	return NewRootCommand()
 }

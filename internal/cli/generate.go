@@ -1,19 +1,23 @@
 package cli
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
 	"github.com/NhaLeTruc/datagen-cli/internal/pipeline"
+	"github.com/NhaLeTruc/datagen-cli/internal/templates"
 	"github.com/spf13/cobra"
 )
 
 // NewGenerateCommand creates the generate command
 func NewGenerateCommand() *cobra.Command {
 	var (
-		inputFile  string
-		outputFile string
-		seed       int64
+		inputFile      string
+		outputFile     string
+		seed           int64
+		templateName   string
+		templateParams []string
 	)
 
 	cmd := &cobra.Command{
@@ -22,12 +26,80 @@ func NewGenerateCommand() *cobra.Command {
 		Long: `Generate a PostgreSQL dump file from a JSON schema definition.
 
 The schema defines tables, columns, and data generation rules.
-Output is a SQL file compatible with PostgreSQL.`,
+Output is a SQL file compatible with PostgreSQL.
+
+You can use a pre-built template with --template or provide a custom schema with --input.`,
+		Example: `  # Generate from custom schema
+  datagen generate -i schema.json -o dump.sql
+
+  # Generate from template
+  datagen generate --template ecommerce -o dump.sql
+
+  # Generate from template with custom parameters
+  datagen generate --template saas --param tenants=500 -o dump.sql
+
+  # Generate with deterministic seed
+  datagen generate -i schema.json -o dump.sql --seed 12345`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// Open input (stdin or file)
+			// Validate flags: must have either input or template, but not both
+			if templateName != "" && inputFile != "" {
+				return fmt.Errorf("cannot specify both --input and --template")
+			}
+			if templateName == "" && inputFile == "" {
+				return fmt.Errorf("must specify either --input or --template")
+			}
+
+			// Open input (stdin, file, or template)
 			var input *os.File
 			var err error
-			if inputFile == "" || inputFile == "-" {
+
+			if templateName != "" {
+				// Load template
+				tmpl, err := templates.Get(templateName)
+				if err != nil {
+					return fmt.Errorf("failed to get template: %w", err)
+				}
+
+				// Parse and apply parameters
+				params, err := parseTemplateParams(templateParams)
+				if err != nil {
+					return fmt.Errorf("failed to parse template parameters: %w", err)
+				}
+
+				if len(params) > 0 {
+					if err := templates.ApplyParameters(tmpl, params); err != nil {
+						return fmt.Errorf("failed to apply template parameters: %w", err)
+					}
+				}
+
+				// Convert template schema to JSON
+				schemaJSON, err := json.MarshalIndent(tmpl.Schema, "", "  ")
+				if err != nil {
+					return fmt.Errorf("failed to marshal template schema: %w", err)
+				}
+
+				// Create a bytes reader as input
+				input = os.NewFile(0, "template")
+				defer input.Close()
+
+				// We need to create a temp file for the schema
+				tmpFile, err := os.CreateTemp("", "datagen-template-*.json")
+				if err != nil {
+					return fmt.Errorf("failed to create temp file: %w", err)
+				}
+				defer os.Remove(tmpFile.Name())
+				defer tmpFile.Close()
+
+				if _, err := tmpFile.Write(schemaJSON); err != nil {
+					return fmt.Errorf("failed to write template schema: %w", err)
+				}
+
+				if _, err := tmpFile.Seek(0, 0); err != nil {
+					return fmt.Errorf("failed to seek temp file: %w", err)
+				}
+
+				input = tmpFile
+			} else if inputFile == "" || inputFile == "-" {
 				input = os.Stdin
 			} else {
 				input, err = os.Open(inputFile)
@@ -71,6 +143,8 @@ Output is a SQL file compatible with PostgreSQL.`,
 	cmd.Flags().StringVarP(&inputFile, "input", "i", "", "input schema file (default: stdin)")
 	cmd.Flags().StringVarP(&outputFile, "output", "o", "", "output SQL file (default: stdout)")
 	cmd.Flags().Int64VarP(&seed, "seed", "s", 0, "random seed for deterministic generation")
+	cmd.Flags().StringVar(&templateName, "template", "", "use pre-built template (ecommerce, saas, healthcare, finance)")
+	cmd.Flags().StringArrayVar(&templateParams, "param", []string{}, "override template parameters (format: key=value)")
 
 	return cmd
 }

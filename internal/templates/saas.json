@@ -1,0 +1,411 @@
+{
+  "version": "1.0",
+  "database": {
+    "name": "saas_db",
+    "encoding": "UTF8",
+    "locale": "en_US.utf8"
+  },
+  "tables": {
+    "tenants": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "serial",
+          "nullable": false
+        },
+        {
+          "name": "name",
+          "type": "varchar(200)",
+          "nullable": false
+        },
+        {
+          "name": "slug",
+          "type": "varchar(100)",
+          "nullable": false,
+          "generator": "pattern",
+          "generator_config": {
+            "pattern": "[a-z]{4,12}"
+          }
+        },
+        {
+          "name": "domain",
+          "type": "varchar(255)",
+          "nullable": true
+        },
+        {
+          "name": "plan",
+          "type": "varchar(20)",
+          "nullable": false,
+          "generator": "weighted_enum",
+          "generator_config": {
+            "values": ["free", "basic", "pro", "enterprise"],
+            "weights": [40, 35, 20, 5]
+          }
+        },
+        {
+          "name": "status",
+          "type": "varchar(20)",
+          "nullable": false,
+          "generator": "weighted_enum",
+          "generator_config": {
+            "values": ["active", "suspended", "cancelled"],
+            "weights": [85, 10, 5]
+          }
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp",
+          "nullable": false
+        }
+      ],
+      "primary_key": ["id"],
+      "unique_constraints": [
+        {
+          "columns": ["slug"]
+        }
+      ],
+      "row_count": 200
+    },
+    "users": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "serial",
+          "nullable": false
+        },
+        {
+          "name": "tenant_id",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "email",
+          "type": "varchar(255)",
+          "nullable": false
+        },
+        {
+          "name": "first_name",
+          "type": "varchar(100)",
+          "nullable": false
+        },
+        {
+          "name": "last_name",
+          "type": "varchar(100)",
+          "nullable": false
+        },
+        {
+          "name": "role",
+          "type": "varchar(20)",
+          "nullable": false,
+          "generator": "weighted_enum",
+          "generator_config": {
+            "values": ["admin", "member", "viewer"],
+            "weights": [10, 70, 20]
+          }
+        },
+        {
+          "name": "status",
+          "type": "varchar(20)",
+          "nullable": false,
+          "generator": "weighted_enum",
+          "generator_config": {
+            "values": ["active", "inactive", "pending"],
+            "weights": [80, 15, 5]
+          }
+        },
+        {
+          "name": "last_login_at",
+          "type": "timestamp",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp",
+          "nullable": false
+        }
+      ],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        {
+          "columns": ["tenant_id"],
+          "referenced_table": "tenants",
+          "referenced_columns": ["id"],
+          "on_delete": "CASCADE"
+        }
+      ],
+      "unique_constraints": [
+        {
+          "columns": ["email"]
+        }
+      ],
+      "row_count": 2000
+    },
+    "subscriptions": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "serial",
+          "nullable": false
+        },
+        {
+          "name": "tenant_id",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "plan",
+          "type": "varchar(20)",
+          "nullable": false,
+          "generator": "weighted_enum",
+          "generator_config": {
+            "values": ["free", "basic", "pro", "enterprise"],
+            "weights": [40, 35, 20, 5]
+          }
+        },
+        {
+          "name": "status",
+          "type": "varchar(20)",
+          "nullable": false,
+          "generator": "weighted_enum",
+          "generator_config": {
+            "values": ["active", "cancelled", "past_due", "trialing"],
+            "weights": [70, 15, 5, 10]
+          }
+        },
+        {
+          "name": "billing_period",
+          "type": "varchar(20)",
+          "nullable": false,
+          "generator": "weighted_enum",
+          "generator_config": {
+            "values": ["monthly", "yearly"],
+            "weights": [60, 40]
+          }
+        },
+        {
+          "name": "amount",
+          "type": "numeric(10,2)",
+          "nullable": false,
+          "generator": "integer_range",
+          "generator_config": {
+            "min": 0,
+            "max": 99999
+          }
+        },
+        {
+          "name": "currency",
+          "type": "varchar(3)",
+          "nullable": false,
+          "generator": "weighted_enum",
+          "generator_config": {
+            "values": ["USD", "EUR", "GBP"],
+            "weights": [70, 20, 10]
+          }
+        },
+        {
+          "name": "start_date",
+          "type": "timestamp",
+          "nullable": false
+        },
+        {
+          "name": "end_date",
+          "type": "timestamp",
+          "nullable": true
+        },
+        {
+          "name": "trial_ends_at",
+          "type": "timestamp",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp",
+          "nullable": false
+        }
+      ],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        {
+          "columns": ["tenant_id"],
+          "referenced_table": "tenants",
+          "referenced_columns": ["id"],
+          "on_delete": "CASCADE"
+        }
+      ],
+      "row_count": 200
+    },
+    "usage_metrics": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "serial",
+          "nullable": false
+        },
+        {
+          "name": "tenant_id",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "metric_name",
+          "type": "varchar(100)",
+          "nullable": false,
+          "generator": "weighted_enum",
+          "generator_config": {
+            "values": ["api_calls", "storage_gb", "users_active", "bandwidth_gb"],
+            "weights": [40, 25, 20, 15]
+          }
+        },
+        {
+          "name": "value",
+          "type": "numeric(12,2)",
+          "nullable": false,
+          "generator": "integer_range",
+          "generator_config": {
+            "min": 0,
+            "max": 1000000
+          }
+        },
+        {
+          "name": "recorded_at",
+          "type": "timestamp",
+          "nullable": false,
+          "generator": "timeseries",
+          "generator_config": {
+            "pattern": "uniform",
+            "interval": "1h"
+          }
+        }
+      ],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        {
+          "columns": ["tenant_id"],
+          "referenced_table": "tenants",
+          "referenced_columns": ["id"],
+          "on_delete": "CASCADE"
+        }
+      ],
+      "indexes": [
+        {
+          "columns": ["tenant_id", "metric_name", "recorded_at"]
+        }
+      ],
+      "row_count": 50000
+    },
+    "billing_invoices": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "serial",
+          "nullable": false
+        },
+        {
+          "name": "tenant_id",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "subscription_id",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "invoice_number",
+          "type": "varchar(50)",
+          "nullable": false,
+          "generator": "template",
+          "generator_config": {
+            "template": "INV-{year}-{seq:6}"
+          }
+        },
+        {
+          "name": "amount",
+          "type": "numeric(10,2)",
+          "nullable": false,
+          "generator": "integer_range",
+          "generator_config": {
+            "min": 0,
+            "max": 99999
+          }
+        },
+        {
+          "name": "currency",
+          "type": "varchar(3)",
+          "nullable": false,
+          "generator": "weighted_enum",
+          "generator_config": {
+            "values": ["USD", "EUR", "GBP"],
+            "weights": [70, 20, 10]
+          }
+        },
+        {
+          "name": "status",
+          "type": "varchar(20)",
+          "nullable": false,
+          "generator": "weighted_enum",
+          "generator_config": {
+            "values": ["paid", "pending", "overdue", "cancelled"],
+            "weights": [75, 15, 8, 2]
+          }
+        },
+        {
+          "name": "issued_at",
+          "type": "timestamp",
+          "nullable": false
+        },
+        {
+          "name": "due_at",
+          "type": "timestamp",
+          "nullable": false
+        },
+        {
+          "name": "paid_at",
+          "type": "timestamp",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": false
+        }
+      ],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        {
+          "columns": ["tenant_id"],
+          "referenced_table": "tenants",
+          "referenced_columns": ["id"],
+          "on_delete": "RESTRICT"
+        },
+        {
+          "columns": ["subscription_id"],
+          "referenced_table": "subscriptions",
+          "referenced_columns": ["id"],
+          "on_delete": "RESTRICT"
+        }
+      ],
+      "unique_constraints": [
+        {
+          "columns": ["invoice_number"]
+        }
+      ],
+      "row_count": 1000
+    }
+  }
+}

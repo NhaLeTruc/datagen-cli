@@ -219,7 +219,7 @@ description: "Task list for JSON Schema to PostgreSQL Dump Generator"
 
 ### Tests for User Story 5 ⚠️
 
-- [ ] T075 [P] [US5] Unit test for template loading in tests/unit/cli/template_test.go (TDD: list, show, export templates)
+- [x] T075 [P] [US5] Unit test for template loading in tests/unit/cli/template_test.go (TDD: list, show, export templates)
 - [ ] T076 [P] [US5] Integration test for ecommerce template in tests/integration/templates/ecommerce_test.go (TDD: verify tables, relationships, data)
 - [ ] T077 [P] [US5] Integration test for saas template in tests/integration/templates/saas_test.go (TDD: verify multi-tenant structure)
 
@@ -227,18 +227,18 @@ description: "Task list for JSON Schema to PostgreSQL Dump Generator"
 
 #### Template Definitions
 
-- [ ] T078 [P] [US5] Create ecommerce template JSON in internal/templates/ecommerce.json (products, categories, customers, orders, order_items, reviews)
-- [ ] T079 [P] [US5] Create saas template JSON in internal/templates/saas.json (tenants, users, subscriptions, usage_metrics, billing)
-- [ ] T080 [P] [US5] Create healthcare template JSON in internal/templates/healthcare.json (patients, doctors, appointments, medical_records, prescriptions)
-- [ ] T081 [P] [US5] Create finance template JSON in internal/templates/finance.json (accounts, customers, transactions, investments, portfolios)
+- [x] T078 [P] [US5] Create ecommerce template JSON in internal/templates/ecommerce.json (products, categories, customers, orders, order_items, reviews)
+- [x] T079 [P] [US5] Create saas template JSON in internal/templates/saas.json (tenants, users, subscriptions, usage_metrics, billing)
+- [x] T080 [P] [US5] Create healthcare template JSON in internal/templates/healthcare.json (patients, doctors, appointments, medical_records, prescriptions)
+- [x] T081 [P] [US5] Create finance template JSON in internal/templates/finance.json (accounts, customers, transactions, investments, portfolios)
 
 #### Template Command
 
-- [ ] T082 [US5] Implement template command in internal/cli/template.go (list, show details, export to file)
-- [ ] T083 [US5] Embed templates using go:embed in internal/templates/embed.go
-- [ ] T084 [US5] Add template loading to generate command in internal/cli/generate.go (--template flag, --template-param flag)
-- [ ] T085 [US5] Implement template parameter substitution in internal/templates/params.go (override row counts, customize values)
-- [ ] T086 [US5] Wire template command to root in internal/cli/root.go
+- [x] T082 [US5] Implement template command in internal/cli/template.go (list, show details, export to file)
+- [x] T083 [US5] Embed templates using go:embed in internal/templates/embed.go
+- [x] T084 [US5] Add template loading to generate command in internal/cli/generate.go (--template flag, --template-param flag)
+- [x] T085 [US5] Implement template parameter substitution in internal/templates/embed.go (override row counts, customize values)
+- [x] T086 [US5] Wire template command to root in internal/cli/root.go
 
 **Checkpoint**: User Stories 1-5 complete - full functionality with templates
 
