@@ -132,20 +132,20 @@ description: "Task list for JSON Schema to PostgreSQL Dump Generator"
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T044 [P] [US2] Unit test for semantic detection in tests/unit/generator/semantic_test.go (TDD: detect email, phone, name, address patterns)
-- [ ] T045 [P] [US2] Contract test for semantic generators in tests/unit/generator/semantic_generators_test.go (TDD: email, phone, name, address outputs)
-- [ ] T046 [P] [US2] Integration test for semantic data generation in tests/integration/pipeline/semantic_pipeline_test.go (TDD: verify realistic data patterns)
+- [x] T044 [P] [US2] Unit test for semantic detection in tests/unit/generator/semantic_test.go (TDD: detect email, phone, name, address patterns)
+- [x] T045 [P] [US2] Contract test for semantic generators in tests/unit/generator/semantic_generators_test.go (TDD: email, phone, name, address outputs)
+- [x] T046 [P] [US2] Integration test for semantic data generation in tests/integration/pipeline/semantic_pipeline_test.go (TDD: verify realistic data patterns)
 
 ### Implementation for User Story 2
 
-- [ ] T047 [P] [US2] Implement semantic column detector in internal/generator/semantic.go (pattern matching for column names)
-- [ ] T048 [P] [US2] Implement email generator using gofakeit in internal/generator/semantic.go (EmailGenerator)
-- [ ] T049 [P] [US2] Implement phone generator using gofakeit in internal/generator/semantic.go (PhoneGenerator)
-- [ ] T050 [P] [US2] Implement name generators using gofakeit in internal/generator/semantic.go (FirstName, LastName, FullName)
-- [ ] T051 [P] [US2] Implement address generators using gofakeit in internal/generator/semantic.go (Address, City, State, Country, PostalCode)
-- [ ] T052 [P] [US2] Implement timestamp generators in internal/generator/semantic.go (CreatedAt, UpdatedAt with realistic ranges)
-- [ ] T053 [US2] Register semantic generators in internal/generator/registry.go (register all semantic generators)
-- [ ] T054 [US2] Update pipeline coordinator to use semantic detection in internal/pipeline/coordinator.go (check semantic patterns before basic types)
+- [x] T047 [P] [US2] Implement semantic column detector in internal/generator/semantic.go (pattern matching for column names)
+- [x] T048 [P] [US2] Implement email generator using gofakeit in internal/generator/semantic.go (EmailGenerator)
+- [x] T049 [P] [US2] Implement phone generator using gofakeit in internal/generator/semantic.go (PhoneGenerator)
+- [x] T050 [P] [US2] Implement name generators using gofakeit in internal/generator/semantic.go (FirstName, LastName, FullName)
+- [x] T051 [P] [US2] Implement address generators using gofakeit in internal/generator/semantic.go (Address, City, State, Country, PostalCode)
+- [x] T052 [P] [US2] Implement timestamp generators in internal/generator/semantic.go (CreatedAt, UpdatedAt with realistic ranges)
+- [x] T053 [US2] Register semantic generators in internal/generator/registry.go (register all semantic generators)
+- [x] T054 [US2] Update pipeline coordinator to use semantic detection in internal/pipeline/coordinator.go (check semantic patterns before basic types)
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work - basic dumps with realistic data
 
