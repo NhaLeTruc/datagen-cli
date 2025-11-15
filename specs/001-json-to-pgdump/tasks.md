@@ -27,13 +27,13 @@ description: "Task list for JSON Schema to PostgreSQL Dump Generator"
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Initialize Go module with `go mod init github.com/NhaLeTruc/datagen-cli`
-- [ ] T002 Create directory structure: cmd/datagen/, internal/{cli,schema,generator,pgdump,pipeline,templates}/, tests/{unit,integration,e2e}/
-- [ ] T003 [P] Create go.mod with dependencies: cobra v1.8+, viper v1.18+, gofakeit/v6 v6.28+, testify v1.9+
-- [ ] T004 [P] Configure golangci-lint with funlen, gocyclo, dupl linters in .golangci.yml
-- [ ] T005 [P] Create Makefile with targets: build, test, lint, coverage, clean
-- [ ] T006 [P] Setup GitHub Actions workflow in .github/workflows/ci.yml for: lint, test, coverage
-- [ ] T007 [P] Create .gitignore for Go projects (bin/, vendor/, *.dump, *.sql)
+- [x] T001 Initialize Go module with `go mod init github.com/NhaLeTruc/datagen-cli`
+- [x] T002 Create directory structure: cmd/datagen/, internal/{cli,schema,generator,pgdump,pipeline,templates}/, tests/{unit,integration,e2e}/
+- [x] T003 [P] Create go.mod with dependencies: cobra v1.8+, viper v1.18+, gofakeit/v6 v6.28+, testify v1.9+
+- [x] T004 [P] Configure golangci-lint with funlen, gocyclo, dupl linters in .golangci.yml
+- [x] T005 [P] Create Makefile with targets: build, test, lint, coverage, clean
+- [x] T006 [P] Setup GitHub Actions workflow in .github/workflows/ci.yml for: lint, test, coverage
+- [x] T007 [P] Create .gitignore for Go projects (bin/, vendor/, *.dump, *.sql)
 
 ---
 
