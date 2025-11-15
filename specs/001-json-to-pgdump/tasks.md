@@ -45,12 +45,12 @@ description: "Task list for JSON Schema to PostgreSQL Dump Generator"
 
 ### Foundational: Schema Foundation
 
-- [ ] T008 Write unit test for schema types in tests/unit/schema/types_test.go (TDD: test Schema, Table, Column structs)
-- [ ] T009 Implement schema type definitions in internal/schema/types.go (Schema, Table, Column, ForeignKey, etc.)
-- [ ] T010 Write unit test for JSON schema parser in tests/unit/schema/parser_test.go (TDD: valid/invalid JSON, edge cases)
-- [ ] T011 Implement JSON schema parser in internal/schema/parser.go (parse JSON to Schema struct)
-- [ ] T012 Write unit test for schema validator in tests/unit/schema/validator_test.go (TDD: type validation, FK references, circular deps)
-- [ ] T013 Implement schema validator in internal/schema/validator.go (validate types, constraints, references)
+- [x] T008 Write unit test for schema types in tests/unit/schema/types_test.go (TDD: test Schema, Table, Column structs)
+- [x] T009 Implement schema type definitions in internal/schema/types.go (Schema, Table, Column, ForeignKey, etc.)
+- [x] T010 Write unit test for JSON schema parser in tests/unit/schema/parser_test.go (TDD: valid/invalid JSON, edge cases)
+- [x] T011 Implement JSON schema parser in internal/schema/parser.go (parse JSON to Schema struct)
+- [x] T012 Write unit test for schema validator in tests/unit/schema/validator_test.go (TDD: type validation, FK references, circular deps)
+- [x] T013 Implement schema validator in internal/schema/validator.go (validate types, constraints, references)
 
 ### Foundational: CLI Framework
 
