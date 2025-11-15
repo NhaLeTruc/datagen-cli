@@ -1,0 +1,54 @@
+run:
+  timeout: 5m
+  tests: true
+  modules-download-mode: readonly
+
+linters:
+  enable:
+    - funlen        # Function length (max 20 lines per constitution)
+    - gocyclo       # Cyclomatic complexity (max 10 per constitution)
+    - dupl          # Code duplication detection
+    - govet         # Go vet
+    - errcheck      # Unchecked errors
+    - staticcheck   # Static analysis
+    - gosimple      # Simplify code
+    - ineffassign   # Ineffectual assignments
+    - unused        # Unused code
+    - typecheck     # Type checking
+    - gofmt         # Formatting
+    - goimports     # Import formatting
+    - misspell      # Spelling mistakes
+    - goconst       # Repeated strings that could be constants
+    - gosec         # Security issues (constitution requirement)
+
+linters-settings:
+  funlen:
+    lines: 20        # Constitution requirement: max 20 lines per function
+    statements: 15
+  gocyclo:
+    min-complexity: 10  # Constitution requirement: max complexity 10
+  dupl:
+    threshold: 100
+  goconst:
+    min-len: 3
+    min-occurrences: 3
+  gosec:
+    severity: medium
+    confidence: medium
+
+issues:
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  exclude-rules:
+    # Exclude test files from some checks
+    - path: _test\.go
+      linters:
+        - funlen
+        - gocyclo
+        - dupl
+
+output:
+  format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
