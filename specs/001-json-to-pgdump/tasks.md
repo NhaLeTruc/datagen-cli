@@ -89,13 +89,13 @@ description: "Task list for JSON Schema to PostgreSQL Dump Generator"
 #### Basic Generators
 
 - [x] T025 [P] [US1] Implement basic type generators in internal/generator/basic.go (integer, varchar, text, timestamp, boolean)
-- [ ] T026 [P] [US1] Implement sequence generator in internal/generator/sequence.go (for serial/bigserial columns)
-- [ ] T027 [US1] Register basic generators in internal/generator/registry.go (register all basic types on init)
+- [x] T026 [P] [US1] Implement sequence generator in internal/generator/sequence.go (for serial/bigserial columns)
+- [x] T027 [US1] Register basic generators in internal/generator/registry.go (register all basic types on init)
 
 #### PostgreSQL Dump Writer (Custom Format)
 
-- [ ] T028 [P] [US1] Write unit test for dump header in tests/unit/pgdump/header_test.go (TDD: magic bytes, version, metadata)
-- [ ] T029 [P] [US1] Implement dump header writer in internal/pgdump/header.go (write PGDMP header, version, timestamp)
+- [x] T028 [P] [US1] Write unit test for dump header in tests/unit/pgdump/header_test.go (TDD: magic bytes, version, metadata)
+- [x] T029 [P] [US1] Implement dump header writer in internal/pgdump/header.go (write PGDMP header, version, timestamp)
 - [ ] T030 [P] [US1] Write unit test for TOC entry in tests/unit/pgdump/toc_test.go (TDD: entry creation, dependencies, offsets)
 - [ ] T031 [P] [US1] Implement TOC structure in internal/pgdump/toc.go (TOCEntry, dependency tracking)
 - [ ] T032 [US1] Write unit test for dump writer in tests/unit/pgdump/writer_test.go (TDD: full dump flow, compression)
