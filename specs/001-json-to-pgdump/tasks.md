@@ -287,7 +287,7 @@ description: "Task list for JSON Schema to PostgreSQL Dump Generator"
 
 - [x] T098 [P] Write unit test for validate command in tests/unit/cli/validate_test.go (TDD: validation output, JSON format)
 - [x] T099 [P] Implement validate command in internal/cli/validate.go (validate schema without generating data)
-- [ ] T100 [P] Add detailed error messages to schema validator in internal/schema/validator.go (line numbers, suggestions)
+- [x] T100 [P] Add detailed error messages to schema validator in internal/schema/validator.go (line numbers, suggestions)
 - [ ] T101 [P] Add pg_query validation option in internal/pgdump/validate.go (optional --validate-output flag)
 
 ### Performance & Concurrency
