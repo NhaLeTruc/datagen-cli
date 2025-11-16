@@ -1,0 +1,218 @@
+{
+  "version": "1.0",
+  "database": {
+    "name": "ecommerce_advanced",
+    "encoding": "UTF8"
+  },
+  "tables": {
+    "orders": {
+      "columns": {
+        "id": {
+          "type": "serial",
+          "primary_key": true
+        },
+        "order_number": {
+          "type": "varchar(50)",
+          "pattern": {
+            "template": "ORD-{year}-{sequence:8}",
+            "comment": "Generates: ORD-2024-00000123"
+          }
+        },
+        "status": {
+          "type": "varchar(20)",
+          "distribution": {
+            "type": "weighted",
+            "weights": {
+              "completed": 80,
+              "pending": 15,
+              "cancelled": 5
+            },
+            "comment": "80% completed, 15% pending, 5% cancelled"
+          }
+        },
+        "order_type": {
+          "type": "varchar(20)",
+          "distribution": {
+            "type": "weighted",
+            "weights": {
+              "standard": 70,
+              "premium": 25,
+              "enterprise": 5
+            }
+          }
+        },
+        "total_amount": {
+          "type": "decimal(10,2)",
+          "rules": [
+            {
+              "if": {"order_type": "standard"},
+              "then": {"min": 10.00, "max": 99.99}
+            },
+            {
+              "if": {"order_type": "premium"},
+              "then": {"min": 100.00, "max": 999.99}
+            },
+            {
+              "if": {"order_type": "enterprise"},
+              "then": {"min": 1000.00, "max": 50000.00}
+            }
+          ],
+          "comment": "Price range depends on order type"
+        },
+        "created_at": {
+          "type": "timestamp",
+          "nullable": false
+        }
+      },
+      "row_count": 10000
+    },
+
+    "products": {
+      "columns": {
+        "id": {
+          "type": "serial",
+          "primary_key": true
+        },
+        "sku": {
+          "type": "varchar(20)",
+          "pattern": {
+            "template": "SKU-{hex:6}-{sequence:4}",
+            "comment": "Generates: SKU-a3f5d2-0001"
+          }
+        },
+        "name": {
+          "type": "varchar(200)",
+          "generator": "product_name"
+        },
+        "popularity_score": {
+          "type": "integer",
+          "distribution": {
+            "type": "zipf",
+            "alpha": 1.5,
+            "min": 1,
+            "max": 1000,
+            "comment": "Power-law distribution - few products are very popular"
+          }
+        },
+        "view_count": {
+          "type": "integer",
+          "distribution": {
+            "type": "normal",
+            "mean": 500,
+            "std_dev": 200,
+            "min": 0,
+            "max": 5000,
+            "comment": "Normally distributed around 500 views"
+          }
+        },
+        "category": {
+          "type": "varchar(50)",
+          "distribution": {
+            "type": "weighted",
+            "weights": {
+              "electronics": 30,
+              "clothing": 25,
+              "home": 20,
+              "sports": 15,
+              "books": 10
+            }
+          }
+        }
+      },
+      "row_count": 5000
+    },
+
+    "user_events": {
+      "columns": {
+        "id": {
+          "type": "serial",
+          "primary_key": true
+        },
+        "event_id": {
+          "type": "varchar(40)",
+          "pattern": {
+            "template": "evt_{timestamp}_{uuid}",
+            "comment": "Generates: evt_1634567890_550e8400-e29b-41d4-a716-446655440000"
+          }
+        },
+        "user_id": {
+          "type": "integer"
+        },
+        "event_type": {
+          "type": "varchar(50)",
+          "distribution": {
+            "type": "weighted",
+            "weights": {
+              "page_view": 60,
+              "click": 25,
+              "purchase": 10,
+              "signup": 5
+            }
+          }
+        },
+        "session_id": {
+          "type": "varchar(50)",
+          "pattern": {
+            "template": "sess_{row}_{random:8}",
+            "comment": "Uses row number for semi-sequential IDs"
+          }
+        },
+        "hourly_events": {
+          "type": "integer",
+          "distribution": {
+            "type": "poisson",
+            "mean": 12.5,
+            "comment": "Events per hour follow Poisson distribution (lambda=12.5)"
+          }
+        }
+      },
+      "row_count": 100000
+    },
+
+    "api_keys": {
+      "columns": {
+        "id": {
+          "type": "serial",
+          "primary_key": true
+        },
+        "key_value": {
+          "type": "varchar(64)",
+          "pattern": {
+            "template": "pk_{alphanumeric:32}",
+            "comment": "Generates: pk_aB3dE5fG7hJ9kL2mN4pQ6rS8tU0vW"
+          }
+        },
+        "environment": {
+          "type": "varchar(20)",
+          "distribution": {
+            "type": "weighted",
+            "weights": {
+              "production": 20,
+              "staging": 30,
+              "development": 50
+            }
+          }
+        },
+        "rate_limit": {
+          "type": "integer",
+          "rules": [
+            {
+              "if": {"environment": "production"},
+              "then": {"min": 10000, "max": 100000}
+            },
+            {
+              "if": {"environment": "staging"},
+              "then": {"min": 1000, "max": 10000}
+            },
+            {
+              "if": {"environment": "development"},
+              "then": {"min": 100, "max": 1000}
+            }
+          ],
+          "comment": "Rate limit depends on environment"
+        }
+      },
+      "row_count": 1000
+    }
+  }
+}
