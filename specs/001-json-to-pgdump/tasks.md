@@ -308,15 +308,15 @@ description: "Task list for JSON Schema to PostgreSQL Dump Generator"
 ### Documentation & Examples
 
 - [x] T111 [P] Create example schemas in docs/examples/ (blog, ecommerce-custom, analytics)
-- [ ] T112 [P] Generate man pages in docs/man/ (using Cobra's GenManTree)
-- [ ] T113 [P] Create architecture documentation in docs/architecture.md
-- [ ] T114 [P] Create generator documentation in docs/generators.md (list all generators, examples)
+- [x] T112 [P] Generate man pages in docs/man/ (using Cobra's GenManTree)
+- [x] T113 [P] Create architecture documentation in docs/architecture.md
+- [x] T114 [P] Create generator documentation in docs/generators.md (list all generators, examples)
 
 ### Build & Release
 
-- [ ] T115 [P] Create build script in scripts/build.sh (cross-compile for linux/darwin/windows, amd64/arm64)
-- [ ] T116 [P] Create test script in scripts/test.sh (unit, integration, e2e, coverage report)
-- [ ] T117 [P] Create release script in scripts/release.sh (GitHub releases, checksums, changelog)
+- [x] T115 [P] Create build script in scripts/build.sh (cross-compile for linux/darwin/windows, amd64/arm64)
+- [x] T116 [P] Create test script in scripts/test.sh (unit, integration, e2e, coverage report)
+- [x] T117 [P] Create release script in scripts/release.sh (GitHub releases, checksums, changelog)
 - [ ] T118 [P] Setup Homebrew tap configuration in homebrew/datagen.rb
 - [ ] T119 [P] Create Dockerfile for Alpine-based image in Dockerfile
 - [ ] T120 [P] Add performance benchmarks to tests/benchmarks/ (benchmark all generators, pipeline throughput)
