@@ -1,0 +1,75 @@
+# Docker Compose configuration for datagen-cli
+# Provides easy local development and testing setup
+
+version: '3.8'
+
+services:
+  # datagen CLI service
+  datagen:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VERSION: ${VERSION:-dev}
+        COMMIT: ${COMMIT:-dev}
+        BUILD_DATE: ${BUILD_DATE:-2025-01-01}
+    image: datagen-cli:${VERSION:-dev}
+    container_name: datagen
+    volumes:
+      # Mount current directory for accessing schemas and output
+      - ./:/workspace
+    working_dir: /workspace
+    user: "1000:1000"
+    # Override entrypoint for interactive use
+    entrypoint: []
+    command: ["/bin/sh"]
+    stdin_open: true
+    tty: true
+
+  # PostgreSQL service for testing generated dumps
+  postgres:
+    image: postgres:16-alpine
+    container_name: datagen-postgres
+    environment:
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: testpass
+      POSTGRES_DB: testdb
+    ports:
+      - "5432:5432"
+    volumes:
+      # Mount volume for persistent data
+      - postgres_data:/var/lib/postgresql/data
+      # Mount workspace for importing generated dumps
+      - ./:/workspace
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U testuser -d testdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
+
+# Example usage:
+#
+# 1. Build and start services:
+#    docker-compose up -d
+#
+# 2. Generate data:
+#    docker-compose run --rm datagen generate \
+#      --input /workspace/docs/examples/blog.json \
+#      --output /workspace/output.sql \
+#      --format sql
+#
+# 3. Import to PostgreSQL:
+#    docker-compose exec postgres psql -U testuser -d testdb -f /workspace/output.sql
+#
+# 4. Verify data:
+#    docker-compose exec postgres psql -U testuser -d testdb -c "SELECT COUNT(*) FROM authors;"
+#
+# 5. Interactive shell:
+#    docker-compose run --rm datagen /bin/sh
+#
+# 6. Stop and clean up:
+#    docker-compose down -v

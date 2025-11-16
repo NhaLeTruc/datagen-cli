@@ -317,9 +317,9 @@ description: "Task list for JSON Schema to PostgreSQL Dump Generator"
 - [x] T115 [P] Create build script in scripts/build.sh (cross-compile for linux/darwin/windows, amd64/arm64)
 - [x] T116 [P] Create test script in scripts/test.sh (unit, integration, e2e, coverage report)
 - [x] T117 [P] Create release script in scripts/release.sh (GitHub releases, checksums, changelog)
-- [ ] T118 [P] Setup Homebrew tap configuration in homebrew/datagen.rb
-- [ ] T119 [P] Create Dockerfile for Alpine-based image in Dockerfile
-- [ ] T120 [P] Add performance benchmarks to tests/benchmarks/ (benchmark all generators, pipeline throughput)
+- [x] T118 [P] Setup Homebrew tap configuration in homebrew/datagen.rb
+- [x] T119 [P] Create Dockerfile for Alpine-based image in Dockerfile
+- [x] T120 [P] Add performance benchmarks to tests/benchmarks/ (benchmark all generators, pipeline throughput)
 
 ---
 

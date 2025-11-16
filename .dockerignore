@@ -1,0 +1,78 @@
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Build artifacts
+bin/
+dist/
+release/
+coverage/
+*.coverprofile
+
+# Test artifacts
+tests/unit/
+tests/integration/
+tests/e2e/
+testdata/
+
+# Documentation (except examples which are copied)
+docs/architecture.md
+docs/generators.md
+docs/man/
+*.md
+!docs/examples/**
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Scripts (not needed in container)
+scripts/
+homebrew/
+
+# Specifications
+specs/
+.specify/
+
+# Docker
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+
+# Environment files
+.env
+.env.*
+*.env
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+
+# Generated files
+*.dump
+*.sql
+*.copy.sql
+
+# Go specific
+vendor/
+*.test
+*.out
+go.work
