@@ -1,0 +1,743 @@
+{
+  "version": "1.0",
+  "database": {
+    "name": "analytics_platform",
+    "encoding": "UTF8",
+    "locale": "en_US.utf8"
+  },
+  "tables": {
+    "tenants": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "serial",
+          "nullable": false,
+          "comment": "Auto-incrementing tenant ID"
+        },
+        {
+          "name": "tenant_code",
+          "type": "varchar(20)",
+          "nullable": false,
+          "pattern": {
+            "template": "TEN-{sequence:6}",
+            "comment": "Generates: TEN-000001, TEN-000002, etc."
+          }
+        },
+        {
+          "name": "company_name",
+          "type": "varchar(200)",
+          "nullable": false
+        },
+        {
+          "name": "tier",
+          "type": "varchar(20)",
+          "nullable": false,
+          "distribution": {
+            "type": "weighted",
+            "weights": {
+              "free": 60,
+              "starter": 25,
+              "professional": 12,
+              "enterprise": 3
+            },
+            "comment": "Realistic SaaS pricing tier distribution"
+          }
+        },
+        {
+          "name": "monthly_users",
+          "type": "integer",
+          "nullable": false,
+          "rules": [
+            {
+              "if": {"tier": "free"},
+              "then": {"min": 1, "max": 5}
+            },
+            {
+              "if": {"tier": "starter"},
+              "then": {"min": 5, "max": 25}
+            },
+            {
+              "if": {"tier": "professional"},
+              "then": {"min": 25, "max": 100}
+            },
+            {
+              "if": {"tier": "enterprise"},
+              "then": {"min": 100, "max": 10000}
+            }
+          ],
+          "comment": "User count constrained by tier"
+        },
+        {
+          "name": "storage_gb",
+          "type": "integer",
+          "nullable": false,
+          "rules": [
+            {
+              "if": {"tier": "free"},
+              "then": {"min": 1, "max": 5}
+            },
+            {
+              "if": {"tier": "starter"},
+              "then": {"min": 10, "max": 50}
+            },
+            {
+              "if": {"tier": "professional"},
+              "then": {"min": 100, "max": 500}
+            },
+            {
+              "if": {"tier": "enterprise"},
+              "then": {"min": 1000, "max": 50000}
+            }
+          ],
+          "comment": "Storage limits based on pricing tier"
+        },
+        {
+          "name": "status",
+          "type": "varchar(20)",
+          "nullable": false,
+          "distribution": {
+            "type": "weighted",
+            "weights": {
+              "active": 85,
+              "suspended": 8,
+              "trial": 5,
+              "churned": 2
+            },
+            "comment": "Most tenants are active, few have churned"
+          }
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": false
+        }
+      ],
+      "primary_key": ["id"],
+      "unique_constraints": [
+        {"columns": ["tenant_code"]}
+      ],
+      "indexes": [
+        {"columns": ["tier"]},
+        {"columns": ["status"]}
+      ],
+      "row_count": 1000
+    },
+
+    "api_keys": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "serial",
+          "nullable": false
+        },
+        {
+          "name": "tenant_id",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "key_value",
+          "type": "varchar(64)",
+          "nullable": false,
+          "pattern": {
+            "template": "sk_{alphanumeric:48}",
+            "comment": "Secret key format: sk_aBcDeF123456..."
+          }
+        },
+        {
+          "name": "key_prefix",
+          "type": "varchar(20)",
+          "nullable": false,
+          "pattern": {
+            "template": "sk_{hex:8}",
+            "comment": "Public key prefix for display"
+          }
+        },
+        {
+          "name": "environment",
+          "type": "varchar(20)",
+          "nullable": false,
+          "distribution": {
+            "type": "weighted",
+            "weights": {
+              "production": 30,
+              "staging": 30,
+              "development": 35,
+              "testing": 5
+            },
+            "comment": "Balanced across environments"
+          }
+        },
+        {
+          "name": "rate_limit_per_hour",
+          "type": "integer",
+          "nullable": false,
+          "rules": [
+            {
+              "if": {"environment": "production"},
+              "then": {"min": 10000, "max": 100000}
+            },
+            {
+              "if": {"environment": "staging"},
+              "then": {"min": 5000, "max": 10000}
+            },
+            {
+              "if": {"environment": "development"},
+              "then": {"min": 1000, "max": 5000}
+            },
+            {
+              "if": {"environment": "testing"},
+              "then": {"min": 100, "max": 1000}
+            }
+          ],
+          "comment": "Rate limits vary by environment"
+        },
+        {
+          "name": "is_active",
+          "type": "boolean",
+          "nullable": false,
+          "distribution": {
+            "type": "weighted",
+            "weights": {
+              "true": 90,
+              "false": 10
+            },
+            "comment": "90% of keys are active"
+          }
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": false
+        }
+      ],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        {
+          "columns": ["tenant_id"],
+          "referenced_table": "tenants",
+          "referenced_columns": ["id"],
+          "on_delete": "CASCADE"
+        }
+      ],
+      "unique_constraints": [
+        {"columns": ["key_value"]}
+      ],
+      "indexes": [
+        {"columns": ["tenant_id"]},
+        {"columns": ["environment"]},
+        {"columns": ["is_active"]}
+      ],
+      "row_count": 3000
+    },
+
+    "events": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigserial",
+          "nullable": false
+        },
+        {
+          "name": "event_id",
+          "type": "varchar(100)",
+          "nullable": false,
+          "pattern": {
+            "template": "evt_{timestamp}_{uuid}",
+            "comment": "Unique event ID with timestamp and UUID"
+          }
+        },
+        {
+          "name": "tenant_id",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "event_type",
+          "type": "varchar(50)",
+          "nullable": false,
+          "distribution": {
+            "type": "weighted",
+            "weights": {
+              "page_view": 50,
+              "api_call": 25,
+              "button_click": 15,
+              "form_submit": 5,
+              "error": 3,
+              "purchase": 2
+            },
+            "comment": "Realistic event distribution - most are page views"
+          }
+        },
+        {
+          "name": "user_id",
+          "type": "varchar(50)",
+          "nullable": true,
+          "pattern": {
+            "template": "usr_{row}_{random:6}"
+          }
+        },
+        {
+          "name": "session_id",
+          "type": "varchar(50)",
+          "nullable": false,
+          "pattern": {
+            "template": "sess_{alphanumeric:32}"
+          }
+        },
+        {
+          "name": "severity",
+          "type": "varchar(20)",
+          "nullable": true,
+          "rules": [
+            {
+              "if": {"event_type": "error"},
+              "then": {
+                "value": "high",
+                "comment": "Errors are high severity"
+              }
+            },
+            {
+              "if": {"event_type": "purchase"},
+              "then": {
+                "value": "medium",
+                "comment": "Purchases need monitoring"
+              }
+            }
+          ],
+          "comment": "Severity only for certain event types"
+        },
+        {
+          "name": "response_time_ms",
+          "type": "integer",
+          "nullable": true,
+          "distribution": {
+            "type": "normal",
+            "mean": 150,
+            "std_dev": 50,
+            "min": 10,
+            "max": 5000,
+            "comment": "Response times normally distributed around 150ms"
+          }
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": false
+        }
+      ],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        {
+          "columns": ["tenant_id"],
+          "referenced_table": "tenants",
+          "referenced_columns": ["id"],
+          "on_delete": "CASCADE"
+        }
+      ],
+      "unique_constraints": [
+        {"columns": ["event_id"]}
+      ],
+      "indexes": [
+        {"columns": ["tenant_id"]},
+        {"columns": ["event_type"]},
+        {"columns": ["created_at"]}
+      ],
+      "row_count": 100000
+    },
+
+    "usage_metrics": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigserial",
+          "nullable": false
+        },
+        {
+          "name": "tenant_id",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "metric_date",
+          "type": "date",
+          "nullable": false
+        },
+        {
+          "name": "metric_name",
+          "type": "varchar(50)",
+          "nullable": false,
+          "distribution": {
+            "type": "weighted",
+            "weights": {
+              "api_requests": 30,
+              "storage_used": 20,
+              "bandwidth_gb": 15,
+              "compute_hours": 15,
+              "database_queries": 10,
+              "active_users": 10
+            }
+          }
+        },
+        {
+          "name": "metric_value",
+          "type": "decimal(15,2)",
+          "nullable": false,
+          "distribution": {
+            "type": "zipf",
+            "alpha": 1.5,
+            "min": 1,
+            "max": 10000,
+            "comment": "Power-law distribution - few tenants have very high usage"
+          }
+        },
+        {
+          "name": "hourly_count",
+          "type": "integer",
+          "nullable": true,
+          "distribution": {
+            "type": "poisson",
+            "mean": 12.5,
+            "comment": "Events per hour follow Poisson distribution"
+          }
+        }
+      ],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        {
+          "columns": ["tenant_id"],
+          "referenced_table": "tenants",
+          "referenced_columns": ["id"],
+          "on_delete": "CASCADE"
+        }
+      ],
+      "indexes": [
+        {"columns": ["tenant_id", "metric_date"]},
+        {"columns": ["metric_name"]},
+        {"columns": ["metric_date"]}
+      ],
+      "row_count": 50000
+    },
+
+    "invoices": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "serial",
+          "nullable": false
+        },
+        {
+          "name": "invoice_number",
+          "type": "varchar(30)",
+          "nullable": false,
+          "pattern": {
+            "template": "INV-{year}{month}-{sequence:6}",
+            "comment": "Generates: INV-202403-000001"
+          }
+        },
+        {
+          "name": "tenant_id",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "billing_period",
+          "type": "varchar(20)",
+          "nullable": false,
+          "distribution": {
+            "type": "weighted",
+            "weights": {
+              "monthly": 80,
+              "annual": 20
+            }
+          }
+        },
+        {
+          "name": "amount",
+          "type": "decimal(10,2)",
+          "nullable": false,
+          "rules": [
+            {
+              "if": {"billing_period": "monthly"},
+              "then": {"min": 0, "max": 999}
+            },
+            {
+              "if": {"billing_period": "annual"},
+              "then": {"min": 0, "max": 10000}
+            }
+          ],
+          "comment": "Annual invoices are larger"
+        },
+        {
+          "name": "status",
+          "type": "varchar(20)",
+          "nullable": false,
+          "distribution": {
+            "type": "weighted",
+            "weights": {
+              "paid": 75,
+              "pending": 18,
+              "overdue": 5,
+              "cancelled": 2
+            }
+          }
+        },
+        {
+          "name": "payment_method",
+          "type": "varchar(30)",
+          "nullable": true,
+          "distribution": {
+            "type": "weighted",
+            "weights": {
+              "credit_card": 60,
+              "bank_transfer": 25,
+              "paypal": 10,
+              "crypto": 5
+            }
+          }
+        },
+        {
+          "name": "reference_code",
+          "type": "varchar(40)",
+          "nullable": true,
+          "pattern": {
+            "template": "REF_{year}_{hex:12}",
+            "comment": "Internal reference code"
+          }
+        },
+        {
+          "name": "issued_at",
+          "type": "timestamp",
+          "nullable": false
+        },
+        {
+          "name": "due_at",
+          "type": "timestamp",
+          "nullable": false
+        },
+        {
+          "name": "paid_at",
+          "type": "timestamp",
+          "nullable": true
+        }
+      ],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        {
+          "columns": ["tenant_id"],
+          "referenced_table": "tenants",
+          "referenced_columns": ["id"],
+          "on_delete": "CASCADE"
+        }
+      ],
+      "unique_constraints": [
+        {"columns": ["invoice_number"]}
+      ],
+      "indexes": [
+        {"columns": ["tenant_id"]},
+        {"columns": ["status"]},
+        {"columns": ["issued_at"]}
+      ],
+      "row_count": 5000
+    },
+
+    "feature_flags": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "serial",
+          "nullable": false
+        },
+        {
+          "name": "flag_key",
+          "type": "varchar(100)",
+          "nullable": false,
+          "pattern": {
+            "template": "feature_{alpha:10}_{sequence:3}",
+            "comment": "Feature flag keys: feature_AbCdEfGhIj_001"
+          }
+        },
+        {
+          "name": "tenant_id",
+          "type": "integer",
+          "nullable": true,
+          "comment": "NULL means global flag"
+        },
+        {
+          "name": "is_enabled",
+          "type": "boolean",
+          "nullable": false,
+          "distribution": {
+            "type": "weighted",
+            "weights": {
+              "true": 30,
+              "false": 70
+            },
+            "comment": "Most features start disabled"
+          }
+        },
+        {
+          "name": "rollout_percentage",
+          "type": "integer",
+          "nullable": false,
+          "distribution": {
+            "type": "normal",
+            "mean": 50,
+            "std_dev": 25,
+            "min": 0,
+            "max": 100,
+            "comment": "Gradual rollout percentages"
+          }
+        },
+        {
+          "name": "environment",
+          "type": "varchar(20)",
+          "nullable": false,
+          "distribution": {
+            "type": "weighted",
+            "weights": {
+              "development": 40,
+              "staging": 30,
+              "production": 30
+            }
+          }
+        }
+      ],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        {
+          "columns": ["tenant_id"],
+          "referenced_table": "tenants",
+          "referenced_columns": ["id"],
+          "on_delete": "CASCADE"
+        }
+      ],
+      "unique_constraints": [
+        {"columns": ["flag_key", "tenant_id"]}
+      ],
+      "indexes": [
+        {"columns": ["tenant_id"]},
+        {"columns": ["is_enabled"]},
+        {"columns": ["environment"]}
+      ],
+      "row_count": 2000
+    },
+
+    "audit_logs": {
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigserial",
+          "nullable": false
+        },
+        {
+          "name": "log_id",
+          "type": "varchar(100)",
+          "nullable": false,
+          "pattern": {
+            "template": "log_{timestamp}_{table}_{row}",
+            "comment": "Traceable log IDs with context"
+          }
+        },
+        {
+          "name": "tenant_id",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "action",
+          "type": "varchar(50)",
+          "nullable": false,
+          "distribution": {
+            "type": "weighted",
+            "weights": {
+              "read": 70,
+              "create": 15,
+              "update": 10,
+              "delete": 4,
+              "admin_action": 1
+            },
+            "comment": "Most actions are reads"
+          }
+        },
+        {
+          "name": "resource_type",
+          "type": "varchar(50)",
+          "nullable": false,
+          "distribution": {
+            "type": "weighted",
+            "weights": {
+              "user": 30,
+              "api_key": 25,
+              "invoice": 20,
+              "settings": 15,
+              "integration": 10
+            }
+          }
+        },
+        {
+          "name": "severity",
+          "type": "varchar(20)",
+          "nullable": false,
+          "rules": [
+            {
+              "if": {"action": "delete"},
+              "then": {"value": "high"}
+            },
+            {
+              "if": {"action": "admin_action"},
+              "then": {"value": "critical"}
+            },
+            {
+              "if": {"action": "update"},
+              "then": {"value": "medium"}
+            },
+            {
+              "if": {"action": "create"},
+              "then": {"value": "medium"}
+            },
+            {
+              "if": {"action": "read"},
+              "then": {"value": "low"}
+            }
+          ],
+          "comment": "Severity based on action type"
+        },
+        {
+          "name": "ip_address",
+          "type": "varchar(45)",
+          "nullable": true
+        },
+        {
+          "name": "user_agent",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": false
+        }
+      ],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        {
+          "columns": ["tenant_id"],
+          "referenced_table": "tenants",
+          "referenced_columns": ["id"],
+          "on_delete": "CASCADE"
+        }
+      ],
+      "unique_constraints": [
+        {"columns": ["log_id"]}
+      ],
+      "indexes": [
+        {"columns": ["tenant_id"]},
+        {"columns": ["action"]},
+        {"columns": ["severity"]},
+        {"columns": ["created_at"]}
+      ],
+      "row_count": 200000
+    }
+  }
+}
