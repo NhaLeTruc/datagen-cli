@@ -1,10 +1,14 @@
 package cli
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
+	"github.com/NhaLeTruc/datagen-cli/internal/pgdump"
 	"github.com/NhaLeTruc/datagen-cli/internal/pipeline"
 	"github.com/NhaLeTruc/datagen-cli/internal/templates"
 	"github.com/spf13/cobra"
@@ -20,6 +24,7 @@ func NewGenerateCommand() *cobra.Command {
 		templateParams []string
 		format         string
 		jobs           int
+		validateOutput bool
 	)
 
 	cmd := &cobra.Command{
@@ -47,7 +52,10 @@ You can use a pre-built template with --template or provide a custom schema with
   datagen generate -i schema.json -o dump.sql --seed 12345
 
   # Generate with parallel workers
-  datagen generate -i schema.json -o dump.sql --jobs 8`,
+  datagen generate -i schema.json -o dump.sql --jobs 8
+
+  # Generate with SQL validation
+  datagen generate -i schema.json -o dump.sql --validate-output`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Validate flags: must have either input or template, but not both
 			if templateName != "" && inputFile != "" {
@@ -173,6 +181,20 @@ You can use a pre-built template with --template or provide a custom schema with
 				return fmt.Errorf("generation failed: %w", err)
 			}
 
+			// Validate output if requested (only for file output, not stdout)
+			if validateOutput {
+				if outputFile == "" || outputFile == "-" {
+					LogWarn("Cannot validate output when writing to stdout (--validate-output requires --output <file>)")
+				} else {
+					if err := validateGeneratedSQL(outputFile); err != nil {
+						return fmt.Errorf("output validation failed: %w", err)
+					}
+					if AppConfig != nil && AppConfig.Verbose {
+						LogInfo("Output validation successful")
+					}
+				}
+			}
+
 			// Print success message to stderr (so it doesn't mix with output)
 			if outputFile != "" && outputFile != "-" {
 				fmt.Fprintf(cmd.ErrOrStderr(), "Successfully generated dump to %s\n", outputFile)
@@ -187,8 +209,102 @@ You can use a pre-built template with --template or provide a custom schema with
 	cmd.Flags().Int64VarP(&seed, "seed", "s", 0, "random seed for deterministic generation")
 	cmd.Flags().StringVarP(&format, "format", "f", "sql", "output format: sql (INSERT statements), copy (COPY format)")
 	cmd.Flags().IntVarP(&jobs, "jobs", "j", 0, "number of parallel workers (default: from config or 4)")
+	cmd.Flags().BoolVar(&validateOutput, "validate-output", false, "validate generated SQL syntax using PostgreSQL parser (requires --output <file>)")
 	cmd.Flags().StringVar(&templateName, "template", "", "use pre-built template (ecommerce, saas, healthcare, finance)")
 	cmd.Flags().StringArrayVar(&templateParams, "param", []string{}, "override template parameters (format: key=value)")
 
 	return cmd
+}
+
+// validateGeneratedSQL validates the SQL in the generated file
+func validateGeneratedSQL(filePath string) error {
+	// Read the generated SQL file
+	sqlContent, err := os.ReadFile(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to read output file: %w", err)
+	}
+
+	// Log validation start
+	if AppConfig != nil && AppConfig.Verbose {
+		LogInfof("Validating generated SQL in %s", filePath)
+	}
+
+	// Pre-process SQL to remove psql meta-commands and filter out COPY data
+	cleanedSQL, err := preprocessSQLForValidation(string(sqlContent))
+	if err != nil {
+		return fmt.Errorf("failed to preprocess SQL: %w", err)
+	}
+
+	// Validate the SQL
+	result := pgdump.ValidateSQLDetailed(cleanedSQL)
+
+	// Check if validation succeeded
+	if !result.Valid {
+		// Log errors
+		LogError("SQL validation failed", result.Errors[0])
+		for i, err := range result.Errors {
+			if i > 0 { // First error already logged above
+				LogErrorf("Additional error %d: %v", i, err)
+			}
+		}
+		return fmt.Errorf("generated SQL contains %d syntax error(s)", len(result.Errors))
+	}
+
+	// Log success with details
+	if AppConfig != nil && AppConfig.Verbose {
+		LogInfof("SQL validation passed: %d statement(s) validated", result.StatementCount)
+	}
+
+	return nil
+}
+
+// preprocessSQLForValidation removes psql meta-commands and COPY data sections
+// that cannot be parsed by pg_query (which only parses actual SQL syntax)
+func preprocessSQLForValidation(sql string) (string, error) {
+	var cleaned bytes.Buffer
+	scanner := bufio.NewScanner(strings.NewReader(sql))
+	inCopyData := false
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		trimmedLine := strings.TrimSpace(line)
+
+		// Skip psql meta-commands (start with backslash)
+		if strings.HasPrefix(trimmedLine, "\\") {
+			if AppConfig != nil && AppConfig.Verbose {
+				LogDebugf("Skipping psql meta-command: %s", trimmedLine)
+			}
+			continue
+		}
+
+		// Detect COPY FROM stdin (start of COPY data section)
+		if strings.Contains(strings.ToUpper(trimmedLine), "COPY") && strings.Contains(strings.ToUpper(line), "FROM STDIN") {
+			// Keep the COPY command itself
+			cleaned.WriteString(line)
+			cleaned.WriteString("\n")
+			inCopyData = true
+			continue
+		}
+
+		// Detect end of COPY data (\.)
+		if inCopyData && trimmedLine == "\\." {
+			inCopyData = false
+			continue
+		}
+
+		// Skip COPY data lines
+		if inCopyData {
+			continue
+		}
+
+		// Keep all other lines (including comments and SQL)
+		cleaned.WriteString(line)
+		cleaned.WriteString("\n")
+	}
+
+	if err := scanner.Err(); err != nil {
+		return "", fmt.Errorf("error reading SQL: %w", err)
+	}
+
+	return cleaned.String(), nil
 }
