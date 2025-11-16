@@ -1,0 +1,49 @@
+# datagen-cli Configuration File
+# Copy this file to .datagen.yaml and customize as needed
+#
+# Configuration precedence (highest to lowest):
+# 1. Command-line flags
+# 2. Environment variables (DATAGEN_*)
+# 3. Config file (.datagen.yaml)
+# 4. Defaults
+
+# Global Settings
+verbose: false  # Enable verbose output
+
+# Generation Settings
+default_seed: 0  # Default random seed (0 = use current time)
+default_format: "sql"  # Default output format: sql, copy
+default_row_count: 100  # Default rows per table if not specified in schema
+default_batch_size: 1000  # Batch size for writing data
+
+# Performance Settings
+workers: 4  # Number of concurrent worker goroutines
+enable_cache: true  # Enable LRU cache for foreign key lookups
+cache_size: 10000  # Maximum cache entries
+stream_writes: true  # Stream data directly to output (lower memory usage)
+
+# Logging Settings
+log_level: "info"  # Log level: debug, info, warn, error
+log_format: "text"  # Log format: text, json
+log_file: ""  # Log file path (empty = stderr)
+
+# Output Settings
+color_output: true  # Use colored output (auto-detects terminal support)
+progress_bar: true  # Show progress bar during generation
+quiet_mode: false  # Suppress non-essential output
+json_output: false  # Output results in JSON format
+pretty_print: true  # Pretty-print JSON output
+show_timestamp: false  # Show timestamps in log messages
+
+# Environment Variable Examples:
+#
+# DATAGEN_VERBOSE=true
+# DATAGEN_DEFAULT_SEED=12345
+# DATAGEN_DEFAULT_FORMAT=copy
+# DATAGEN_WORKERS=8
+# DATAGEN_LOG_LEVEL=debug
+# DATAGEN_LOG_FILE=/var/log/datagen.log
+#
+# Usage:
+#   export DATAGEN_VERBOSE=true
+#   datagen generate --input schema.json --output output.sql

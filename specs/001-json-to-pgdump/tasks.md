@@ -301,9 +301,9 @@ description: "Task list for JSON Schema to PostgreSQL Dump Generator"
 
 ### Configuration & Logging
 
-- [ ] T108 [P] Implement config file loading in internal/cli/config.go (Viper, .datagen.yaml, precedence)
-- [ ] T109 [P] Add structured logging in internal/cli/logging.go (zerolog, security events, --verbose)
-- [ ] T110 [P] Add progress indicators to generate command in internal/cli/progress.go (progress bars, table completion)
+- [x] T108 [P] Implement config file loading in internal/cli/config.go (Viper, .datagen.yaml, precedence)
+- [x] T109 [P] Add structured logging in internal/cli/logging.go (zerolog, security events, --verbose)
+- [x] T110 [P] Add progress indicators to generate command in internal/cli/progress.go (progress bars, table completion)
 
 ### Documentation & Examples
 
