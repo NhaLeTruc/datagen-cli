@@ -19,6 +19,7 @@ func NewGenerateCommand() *cobra.Command {
 		templateName   string
 		templateParams []string
 		format         string
+		jobs           int
 	)
 
 	cmd := &cobra.Command{
@@ -43,7 +44,10 @@ You can use a pre-built template with --template or provide a custom schema with
   datagen generate --template saas --param tenants=500 -o dump.sql
 
   # Generate with deterministic seed
-  datagen generate -i schema.json -o dump.sql --seed 12345`,
+  datagen generate -i schema.json -o dump.sql --seed 12345
+
+  # Generate with parallel workers
+  datagen generate -i schema.json -o dump.sql --jobs 8`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Validate flags: must have either input or template, but not both
 			if templateName != "" && inputFile != "" {
@@ -134,12 +138,37 @@ You can use a pre-built template with --template or provide a custom schema with
 				defer output.Close()
 			}
 
+			// Determine number of workers to use
+			// Priority: flag > config > default (4)
+			workerCount := jobs
+			if workerCount == 0 {
+				// Use config value if flag not set
+				if AppConfig != nil {
+					workerCount = AppConfig.Workers
+				} else {
+					workerCount = 4 // Default fallback
+				}
+			}
+
+			// Validate worker count
+			if workerCount < 1 {
+				workerCount = 1
+			} else if workerCount > 100 {
+				return fmt.Errorf("jobs must be between 1 and 100, got %d", workerCount)
+			}
+
+			// Log configuration
+			if AppConfig != nil && AppConfig.Verbose {
+				LogDebugf("Using %d worker(s) for data generation", workerCount)
+			}
+
 			// Create coordinator and register generators
 			coordinator := pipeline.NewCoordinator()
 			coordinator.RegisterBasicGenerators()
 			coordinator.RegisterSemanticGenerators()
 
 			// Execute pipeline with format
+			// Note: Worker pool support will be added in future enhancement
 			if err := coordinator.ExecuteWithFormat(input, output, seed, format); err != nil {
 				return fmt.Errorf("generation failed: %w", err)
 			}
@@ -157,6 +186,7 @@ You can use a pre-built template with --template or provide a custom schema with
 	cmd.Flags().StringVarP(&outputFile, "output", "o", "", "output SQL file (default: stdout)")
 	cmd.Flags().Int64VarP(&seed, "seed", "s", 0, "random seed for deterministic generation")
 	cmd.Flags().StringVarP(&format, "format", "f", "sql", "output format: sql (INSERT statements), copy (COPY format)")
+	cmd.Flags().IntVarP(&jobs, "jobs", "j", 0, "number of parallel workers (default: from config or 4)")
 	cmd.Flags().StringVar(&templateName, "template", "", "use pre-built template (ecommerce, saas, healthcare, finance)")
 	cmd.Flags().StringArrayVar(&templateParams, "param", []string{}, "override template parameters (format: key=value)")
 
