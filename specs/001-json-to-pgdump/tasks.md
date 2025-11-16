@@ -292,10 +292,10 @@ description: "Task list for JSON Schema to PostgreSQL Dump Generator"
 
 ### Performance & Concurrency
 
-- [ ] T102 [P] Write unit test for worker pool in tests/unit/pipeline/workers_test.go (TDD: concurrent generation, backpressure)
-- [ ] T103 [P] Implement worker pool in internal/pipeline/workers.go (configurable workers, channel coordination)
-- [ ] T104 [P] Write unit test for LRU cache in tests/unit/generator/cache_test.go (TDD: FK lookups, eviction)
-- [ ] T105 [P] Implement LRU cache for FK lookups in internal/generator/cache.go (hashicorp/golang-lru v2)
+- [x] T102 [P] Write unit test for worker pool in tests/unit/pipeline/workers_test.go (TDD: concurrent generation, backpressure)
+- [x] T103 [P] Implement worker pool in internal/pipeline/workers.go (configurable workers, channel coordination)
+- [x] T104 [P] Write unit test for LRU cache in tests/unit/generator/cache_test.go (TDD: FK lookups, eviction)
+- [x] T105 [P] Implement LRU cache for FK lookups in internal/generator/cache.go (hashicorp/golang-lru v2)
 - [x] T106 [P] Add --jobs flag to generate command in internal/cli/generate.go (control worker count)
 - [x] T107 [P] Implement streaming write for large tables in internal/pgdump/writer.go (batch size 1000 rows)
 
